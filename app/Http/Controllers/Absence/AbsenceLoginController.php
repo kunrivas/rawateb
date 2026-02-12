@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Http\Controllers\Absence;
+
+use App\Models\adm;
+use App\Models\Note;
+use App\Models\User;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Validator;
+
+class AbsenceLoginController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "username" => "required",
+            "password" => "required",
+
+        ]);
+        $user = User::where('user_username', $request->username)->first();
+        if (is_null($user)) {
+            return redirect()->back()->withErrors(['اسم المستخدم غير موجود']);
+        }
+
+        if (Crypt::decrypt($user->user_password) !== $request->input('password')) {
+            return redirect()->back()->withErrors(['كلمة المرور خاطئة']);
+        }
+
+
+       /* if (!$user->hasRole("abs-admin")) {
+            return redirect()->back()->withErrors([' ليس لديك الصلاحية للوصول إلى هاته الصفحة لقد تم تسديل بياناتك لمراجعتها']);
+        }*/
+        Auth::login($user);
+
+
+
+        return redirect()->route("absence-home");
+    }
+}
