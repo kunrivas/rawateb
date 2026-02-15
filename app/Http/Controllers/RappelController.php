@@ -70,7 +70,7 @@ class RappelController extends Controller
         // returning view employees-list with passing parametre employees
         //dd($adms_select);
         return view('rappel/employees-list', ["employees" => $employees, "adms" => $adms, "select_adms" => $select_adms, "select_sitpai" => $select_sitpai, "search" => $search]);
- }
+    }
 
 
 
@@ -81,11 +81,11 @@ class RappelController extends Controller
         $employee = employee::where("MATRI", $MATRI)->first();
         //all the records (get)
         $rappel_singles = rappel_megration::with("ra_megration")
-        ->where("MATRI", $MATRI)
-        ->join('ra_megrations', 'rappel_megrations.ID_MEGRATION_RA', '=', 'ra_megrations.ID_MEGRATION_RA')
-        ->orderBy('ra_megrations.YEAR', 'DESC')
-        ->select('rappel_megrations.*') // Avoid duplicate columns from join
-        ->paginate(10);
+            ->where("MATRI", $MATRI)
+            ->join('ra_megrations', 'rappel_megrations.ID_MEGRATION_RA', '=', 'ra_megrations.ID_MEGRATION_RA')
+            ->orderBy('ra_megrations.YEAR', 'DESC')
+            ->select('rappel_megrations.*') // Avoid duplicate columns from join
+            ->paginate(10);
         //$rappel_singles = rappel_megration::with("ra_megration")->where("MATRI", "0000247")->get();
         //dd( $rappel_singles);
         //passing 2 variables (employee, salary_singles) with returning view salary/single/list
@@ -186,63 +186,67 @@ class RappelController extends Controller
     public function rappel_global_print(Request $request)
     {
         $current_megration =  ra_megration::where('ID_MEGRATION_RA', $request->ID_MEGRATION_RA)->first();
-       //dd(  $current_megration);
         if ($current_megration === null) {
             return redirect()->back();
         }
-        
+
         $establishment = session()->get("establishment");
 
-      if (env("APP_ENV", "local") == "local")
-            $rappel_megrations_query = rappel_megration::join('employees', 'rappel_megrations.MATRI', '=', 'employees.MATRI')
-        /*  ->where("employees.AFFECT", "390904");
-        else
-            $rappel_megrations_query = rappel_megration::join('employees', 'rappel_megrations.MATRI', '=', 'employees.MATRI')
-                ->where("employees.AFFECT", $establishment->estab_rawateb_user) */;
-  
+        $rappel_megrations_query = rappel_megration::join('employees', 'rappel_megrations.MATRI', '=', 'employees.MATRI');
 
-        $rappel_megrations = $rappel_megrations_query
-          /*   ->where("rappel_megrations.ADM", $request->ADM)
-            ->Where("rappel_megrations.ID_MEGRATION_RA", $current_megration->ID_MEGRATION_RA)
-            ->with(['new_rappel_grants', 'old_rappel_grants'])
-            ->select(
-                'rappel_megrations.*',
-                'employees.*',
-                'rappel_megrations.ADM as ADM',
-                'employees.AFFECT as AFFECT'
-            ) */
-            ->get();
-           //     dd( $rappel_megrations);
-        $adm = adm::where("ADM", $request->ADM)->first();
-        $view_data = [];
-        
-        foreach ($rappel_megrations  as $rappel) {
-            $item = [];
-            $item["matri"] = $rappel->MATRI;
-            $item["fullName"] = $rappel->NOMA . ' ' . $rappel->PRENOMA;
-            
-            // IND 610 is Gross
-            $new_gross = $rappel->new_rappel_grants->where('IND', '610')->first();
-            $old_gross = $rappel->old_rappel_grants->where('IND', '610')->first();
-            
-            $item["new_gross"] = $new_gross ? $new_gross->BASENBR : 0;
-            $item["old_gross"] = $old_gross ? $old_gross->BASENBR : 0;
-            
-            // IND 999 is Net Paid
-            $new_net = $rappel->new_rappel_grants->where('IND', '999')->first();
-            $old_net = $rappel->old_rappel_grants->where('IND', '999')->first();
-            
-            $item["new_net"] = $new_net ? $new_net->MONTANT : 0;
-            $item["old_net"] = $old_net ? $old_net->MONTANT : 0;
-            
-            array_push($view_data, $item);
+        if (env("APP_ENV", "local") != "local") {
+            $rappel_megrations_query = $rappel_megrations_query->where("employees.AFFECT", $establishment->estab_rawateb_user);
+        } else {
+            $rappel_megrations_query = $rappel_megrations_query->where("employees.AFFECT", "390904");
         }
 
+        $rappel_megrations = $rappel_megrations_query
+            ->where("rappel_megrations.ADM", $request->ADM)
+            ->where("rappel_megrations.ID_MEGRATION_RA", $current_megration->ID_MEGRATION_RA)
+            // ->with(['new_rappel_grants.rappel_grant_due', 'new_rappel_rasit'])
+            ->select(
+                'rappel_megrations.*',
+                'employees.NOMA',
+                'employees.PRENOMA',
+                'rappel_megrations.ADM as ADM',
+                'employees.AFFECT as AFFECT'
+            )
+            ->get();
+        //    dd($rappel_megrations);
+        $adm = adm::where("ADM", $request->ADM)->first();
+        $view_data = [];
+
+        foreach ($rappel_megrations as $rappel) {
+            $item = [];
+            $item["matri"] = $rappel->MATRI;
+            $item["AFFECT"] = $rappel->AFFECT;
+            $item["fullName"] = $rappel->NOMA . ' ' . $rappel->PRENOMA;
+            $item["SITFAM"] = $rappel->new_rappel_rasit->SITFAM ?? '/';
+            $item["CATEG"] = $rappel->new_rappel_rasit->CATEG ?? '/';
+            $item["ECH"] = $rappel->new_rappel_rasit->ECH ?? '/';
+            $item["BASENBR"] = $rappel->rappel_grant_due->BASENBR ?? 0;
+            $item["MONTANT"] = $rappel->rappel_grant_due->MONTANT ?? 0;
+            /*  // Extract Due values from new_rappel_grants -> rappel_grant_due
+            $gross_due_obj = $rappel->new_rappel_grants->where('IND', '610')->first();
+            $item["gross_due"] = ($gross_due_obj && $gross_due_obj->rappel_grant_due) ? $gross_due_obj->rappel_grant_due->BASENBR : 0;
+            
+            $ss_due_obj = $rappel->new_rappel_grants->where('IND', '980')->first();
+            $item["ss_due"] = ($ss_due_obj && $ss_due_obj->rappel_grant_due) ? $ss_due_obj->rappel_grant_due->MONTANT : 0;
+            
+            $tax_due_obj = $rappel->new_rappel_grants->where('IND', '660')->first();
+            $item["tax_due"] = ($tax_due_obj && $tax_due_obj->rappel_grant_due) ? $tax_due_obj->rappel_grant_due->MONTANT : 0;
+            
+            $net_due_obj = $rappel->new_rappel_grants->where('IND', '999')->first();
+            $item["net_due"] = ($net_due_obj && $net_due_obj->rappel_grant_due) ? $net_due_obj->rappel_grant_due->MONTANT : 0; */
+
+            array_push($view_data, $item);
+        }
+dd($rappel_megrations);
         $mpdf = new CMPDF();
         $mpdf->initialize([
             'orientation' => 'L',
         ]);
-        
+
         $mpdf->viewToPDF('rappel/global/pdf-ar', ['data' => $view_data, "adm" => $adm, "current_megration" => $current_megration]);
 
         $mpdf->outPut('I');

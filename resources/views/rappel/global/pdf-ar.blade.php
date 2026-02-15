@@ -129,13 +129,14 @@
             <thead>
                 <tr>
                     <td bgcolor="PaleGoldenrod">الرمز</td>
+                    <td bgcolor="PaleGoldenrod">رمز المؤسسة</td>
                     <td bgcolor="PaleGoldenrod"> اللقب , الإسم </td>
-                    <td bgcolor="PaleGoldenrod">المبلغ الخام الجديد</td>
-                    <td bgcolor="PaleGoldenrod">المبلغ الخام القديم</td>
-                    <td bgcolor="PaleGoldenrod">الفرق (الخام)</td>
-                    <td bgcolor="PaleGoldenrod">الصافي المدفوع الجديد</td>
-                    <td bgcolor="PaleGoldenrod">الصافي المدفوع القديم</td>
-                    <td bgcolor="PaleGoldenrod">الفرق (الصافي)</td>
+                    <td bgcolor="PaleGoldenrod">الحالة العائلية</td>
+                    <td bgcolor="PaleGoldenrod">الصنف الدرجة </td>
+                    <td bgcolor="PaleGoldenrod">خام الاستحقاق</td>
+                    <td bgcolor="PaleGoldenrod">إقتطاع الضمان للاستحقاق</td>
+                    <td bgcolor="PaleGoldenrod">إقتطاع الضريبة للاستحقاق</td>
+                    <td bgcolor="PaleGoldenrod"> الصافي المدفوع للاستحقاق</td>
                 </tr>
 
             </thead>
@@ -145,19 +146,23 @@
                     @foreach ($data as $key => $value)
                         <tr>
                             <td>{{ $value['matri'] }}</td>
+                            <td>{{ $value['AFFECT'] }}</td>
                             <td>{{ $value['fullName'] }}</td>
-                            <td> {{ number_format($value['new_gross'], 2) }}</td>
-                            <td> {{ number_format($value['old_gross'], 2) }}</td>
-                            <td> {{ number_format($value['new_gross'] - $value['old_gross'], 2) }}</td>
-                            <td> {{ number_format($value['new_net'], 2) }}</td>
-                            <td> {{ number_format($value['old_net'], 2) }}</td>
-                            <td> {{ number_format($value['new_net'] - $value['old_net'], 2) }}</td>
+                            <td>{{ $value['SITFAM'] }}</td>
+                            <td>
+                                <div>{{ $value['CATEG'] }}</div>
+                                <div>{{ $value['ECH'] }}</div>
+                            </td>
+                          {{--   <td> {{ number_format($value['gross_due'], 2) }}</td>
+                            <td> {{ number_format($value['ss_due'], 2) }}</td>
+                            <td> {{ number_format($value['tax_due'], 2) }}</td>
+                            <td> {{ number_format($value['net_due'], 2) }}</td> --}}
                         </tr>
                     @endforeach
                 @else
                     <tr>
 
-                        <td colspan="8">There are no data.</td>
+                        <td colspan="9">There are no data.</td>
 
                     </tr>
 
