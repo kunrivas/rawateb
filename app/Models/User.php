@@ -14,7 +14,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     //
-    protected $guarded =[];
+    protected $connection = 'mysql_user';
     public function establishemnet()
     {
         return $this->hasOne(establishment::class,'estab_accountant_id','id');

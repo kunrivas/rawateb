@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use Validator;
 use App\Models\adm;
 use App\Models\Note;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Validator;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Crypt;
 
 class AdminLoginController extends Controller
@@ -31,7 +32,10 @@ class AdminLoginController extends Controller
             return redirect()->back()->withErrors(['اسم المستخدم غير موجود']);
         }
 
-        if (Crypt::decrypt($user->user_password) !== $request->input('password')) {
+        // if (Crypt::decrypt($user->user_password) !== $request->input('password')) {
+        //     return redirect()->back()->withErrors(['كلمة المرور خاطئة']);
+        // }
+        if (!Hash::check($request->input('password'), $user->user_password)) {
             return redirect()->back()->withErrors(['كلمة المرور خاطئة']);
         }
 

@@ -29,26 +29,18 @@
                 <form method="post" action="{{ route('admin-rendement-single-employees') }}">
                       @csrf
                     <div class="col-6 input-group mb-3 row">
-                        {{--  label search --}}
                         <div class="col-2  text-center">إبحث عن</div>
-
                         <div class="col-8" style="position: relative">
-                            {{--  input search --}}
                             <input type="text" class="form-control" id="search" name="search" placeholder="موظف"
                                 value="{{ $search }}">
-                            {{-- dropdown filter --}}
                             <div class="dropdown" style="position: absolute;top:0;left:9px">
-                                {{--  btn of  open filter  dropdown --}}
                                 <button class="btn  " type="button" data-toggle="dropdown"
                                     style="background: transparent; height: 34px;          border-right: 1px solid #ced4da;
-                                      ">
-                                    {{-- btn icon --}}
+                                                                        ">
                                     <i class="fa fa-filter"></i>
                                 </button>
-                                {{--   menu of dropdown --}}
                                 <div class="dropdown-menu dropdown-menu-right  " style="width: 500px;padding: 10px;">
                                     <div class="row">
-                                        {{--   the part  of status  --}}
                                         <div class="col">
                                             <h5 style="text-align: right">الحالة</h5>
                                             <div>
@@ -71,20 +63,17 @@
                                                     </label>
                                                 </div>
                                             </div>
-                                        </div>
-                                        {{--   the part  of adms  --}}
+                                                </div>
                                         <div class="col-6" style="border-right: 0.5px solid #dfd9d9;padding-right: 10px;">
                                             <h5 style="text-align: right">الادارة</h5>
                                             <div>
                                                 @foreach ($adms as $adm)
-                                                    {{--   condition if to ignor  'الكل' --}}
                                                     @if ($adm->ADM != '0')
                                                         <div class="form-check d-flex">
                                                             <input class="form-check-input" type="checkbox"
-                                                                name="adms[{{ $adm->ADM }}]" {{-- condition if this adm->ADM is in select_adms array make it checked --}}
+                                                                name="adms[{{ $adm->ADM }}]"
                                                                 @if (in_array($adm->ADM, $select_adms)) checked @endif
                                                                 id="flexCheckIndeterminate">
-                                                            {{-- checkbox label of affichage --}}
                                                             <label class="form-check-label" for="flexCheckIndeterminate">
                                                                 {{ $adm->LIBTABA }}
                                                             </label>

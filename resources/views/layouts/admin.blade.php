@@ -222,7 +222,6 @@
                                             <p> قائمة الموظفين</p>
                                         </a>
                                     </li>
-
                                     <li class="nav-item">
                                         <a href={{ route('admin-tresor-stat') }} class="nav-link ">
                                             <i class="fa fa-circle-o nav-icon"></i>
@@ -231,10 +230,8 @@
                                     </li>
 
                                 </ul>
-
-
-
                             </li>
+
                             @if (auth()->check() && auth()->user()->hasRole('manager'))
                                 <li class="nav-header">الحزم</li>
                                 <li
@@ -294,9 +291,9 @@
 
 
                                 {{--  </ul>
-                       
-                              <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                              data-accordion="false"> --}}
+
+                        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                            data-accordion="false"> --}}
 
                                 <!-- Add icons to the links using the .nav-icon class
                              with font-awesome or any other icon font library -->
@@ -353,9 +350,6 @@
                                     </ul>
                                 </li>
                             @endif
-
-
-
                             <li class="nav-header">الكشوف</li>
 
                             <li
@@ -471,7 +465,7 @@
                                             <p> كشف الإقتطاعات الفردي </p>
                                         </a>
                                     </li>
-                                  {{--   <li class="nav-item">
+                                    {{--   <li class="nav-item">
                                         <a href={{ route('admin-deduction-single-employees') }} class="nav-link  ">
                                             <i class="fa fa-circle-o nav-icon"></i>
                                             <p> كشف الإقتطاعات الجماعي </p>
@@ -480,7 +474,6 @@
 
                                 </ul>
                             </li>
-
                             @if (auth()->check() && auth()->user()->hasRole('manager'))
                                 <li class="nav-header">العمل والأجر</li>
                                 <li
@@ -655,15 +648,15 @@
                                         @csrf
                                     </form>
                                 </li>
-                              @else
+                            @else
                                 <li class="nav-item">
                                     <a href="{{ route('google2fa.setup') }}" class="nav-link">
                                         <i class="fa fa-shield"></i>
                                         <p>تفعيل المصادقة الثنائية</p>
                                     </a>
                                 </li>
-                              @endif 
-                                --}}
+                            @endif 
+ --}}
                             @endif
                             <li class="nav-item">
                                 <a class="nav-link" href="#"

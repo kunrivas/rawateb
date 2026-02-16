@@ -327,7 +327,7 @@
                                 data-accordion="false">
                                 <!-- Add icons to the links using the .nav-icon class
                              with font-awesome or any other icon font library -->
-                                <li class="nav-header">مراسلة  الخزينة العمومية </li>
+                                <li class="nav-header">مراسلة الخزينة العمومية </li>
 
                                 <li class="nav-item has-treeview {{ request()->is('tresor/*') ? 'menu-open' : '' }} ">
                                     <a href="#"
@@ -347,10 +347,9 @@
                                             </a>
                                         </li>
 
-                                       
+
                                     </ul>
                                 </li>
-
 
 
                                 <li class="nav-header">تسير نفقات المستخدمين</li>
@@ -443,12 +442,14 @@
                                                 <p>كشف المخلفات الفردي</p>
                                             </a>
                                         </li>
+
                                         <li class="nav-item">
-                                            <a href={{ route('rappel-global-megration-list') }} class="nav-link  ">
+                                            <a href={{ route('rappel-global-list') }} class="nav-link  ">
                                                 <i class="fa fa-circle-o nav-icon"></i>
                                                 <p>كشف المخلفات الجماعي</p>
                                             </a>
                                         </li>
+
                                         <li class="nav-item">
                                             <a href={{ route('rappel-reservation') }} class="nav-link  ">
                                                 <i class="fa fa-circle-o nav-icon"></i>
@@ -608,9 +609,9 @@
                                     </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item">
-                                            <a href="{{ route('settings-employee-list') }}" class="nav-link">
+                                            <a href={{ route('settings-employee-list') }} class="nav-link">
                                                 <i class="fa fa-circle-o nav-icon"></i>
-                                                <p>تسيير الموظفين</p>
+                                                <p> تسيير الموظفين</p>
                                             </a>
                                         </li>
                                         <li class="nav-item">

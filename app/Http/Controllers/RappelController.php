@@ -174,8 +174,8 @@ class RappelController extends Controller
         $mpdf->outPut('I');
     }
 
-    public function rappel_global_megration_list()
-    {
+    public function rappel_global_list()
+    {// dd(1);
         $ra_megrations = ra_megration::orderBy("YEAR", "DESC")->paginate(10);
         $adms = adm::all();
         //passing variable $megrations with returning view

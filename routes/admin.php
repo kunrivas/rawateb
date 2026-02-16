@@ -1,11 +1,11 @@
 
 <?php
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\TresorController;
-use App\Http\Controllers\Admin\EmployeeControlle;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\settings\FonctionController;
+use App\Http\Controllers\Admin\EmployeeControlle;
+use App\Http\Controllers\Admin\TresorController;
 
 /* all the routes must pass this middleware
 the middleware has test of env local doesnt work
@@ -219,7 +219,7 @@ Route::group([
     Route::post('/manager/tamadres/single', [App\Http\Controllers\Admin\TamadresController::class, 'index'])->name('admin-tamadres-single-employees');
     Route::get('/manager/tamadres/single/{MATRI}/list', [App\Http\Controllers\Admin\TamadresController::class, 'tamadres_single_list'])->name('admin-tamadres-single-list');
     Route::post('/manager/tamadres/single/print', [App\Http\Controllers\Admin\TamadresController::class, 'tamadres_single_print'])->name('admin-tamadres-single-print');
-
+     
     /**
      * deduction
      */
@@ -314,10 +314,12 @@ Route::group([
     Route::get('/manager/tresor/print', [TresorController::class, 'print'])->name('admin-tresor-print');
 
     Route::get('/manager/tresor/stat', [TresorController::class, 'stat'])->name('admin-tresor-stat');
-    Route::get('/manager/tresor/establishment/{affect}/list', [TresorController::class, 'showByEstablishment'])
-        ->name('admin-tresor-establishment-list');
-    Route::get('/manager/tresor/sql', [TresorController::class, 'exportTresorToSQL'])->name('admin-tresor-sql');
-    Route::get('/manager/tresor/excel', [TresorController::class, 'exportTresorToExcel'])->name('admin-tresor-excel');
+     Route::get('manager/tresor/establishment/{affect}/list', [TresorController::class, 'showByEstablishment'])
+    ->name('admin-tresor-establishment-list');
+     Route::get('/manager/tresor/sql', [TresorController::class, 'exportTresorToSQL'])->name('admin-tresor-sql');
+     Route::get('/manager/tresor/excel', [TresorController::class, 'exportTresorToExcel'])->name('admin-tresor-excel');
+  
+
 
     /**
      * fonction

@@ -64,7 +64,7 @@
                                             @csrf
                                             <input type="hidden" name="id"
                                                 value="{{ $rappelReservation->rappel_reservation_id }}">
-                                            <input type="hidden" name="status"
+                                            <input type="hidden" name="sitpai"
                                                 value="@if ($rappelReservation->STATUS==1) 0 @else 1 @endif">
                                             <button type="submit" class="dropdown-item font-weight-bold " href="#">
                                                 @if ($rappelReservation->STATUS==1)

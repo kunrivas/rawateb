@@ -2,20 +2,27 @@
 
 namespace App\Http\Controllers\Admin\Megrations;
 
-use App\Models\employee;
-use App\Models\emp_megration;
-use App\Models\grant;
-use App\Models\megration;
-use Illuminate\Http\Request;
+use Exception;
+use Carbon\Carbon;
 
-use App\Http\Controllers\Controller;
+use App\Models\adm;
+use App\Models\grant;
+use App\Models\employee;
+use App\Models\megration;
+use App\Models\stat_emp_megration;
+use Illuminate\Http\Request;
+use App\Models\emp_megration;
+use App\Jobs\SalaryMegrationJob;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
 
 class SalaryMegrationController extends Controller
 {
-    public const SALARY_MEGRATION_FOLDER = "megration/salary";
+    protected $script_path;
+    protected $path_folder;
 
+    // if prouction web mode storage path differnt of local mode
     public static function storagePath(): string
     {
         return app()->environment('production')
@@ -23,378 +30,441 @@ class SalaryMegrationController extends Controller
             : base_path('storage/app/private');
     }
 
+    // salary Megration folder path
+    public const SALARY_MEGRATION_FOLDER = "megration/salary";
+
+
+    /* constructor is a special function that gets called automatically when
+     an instance (object) of the class is created.
+    */
+    public function __construct()
+    {   //to define script python
+        // $this->script_path = base_path() . DIRECTORY_SEPARATOR . 'process' . DIRECTORY_SEPARATOR . 'salary_megration.py';
+
+        //to define folder of megration
+        /*  DIRECTORY_SEPARATOR: This is a predefined constant in PHP that represents the directory separator
+        for the current operating system (/ for Unix-based systems and \ for Windows).  */
+
+        /*       The constructed path will look something like this:
+        On Windows systems: public\app\megration\salary\ */
+        //$this->path_folder = 'public' . DIRECTORY_SEPARATOR . "app" . DIRECTORY_SEPARATOR . "megration" . DIRECTORY_SEPARATOR . "salary" . DIRECTORY_SEPARATOR;
+    }
+
+
     public function index()
     {
+        //to show the megrations list of salary
         $megrations = megration::orderBy("YEAR", "DESC")
             ->orderBy("MONTH", "DESC")
             ->paginate(10);
         return view('admin.megrations.salary.list', ["megrations" => $megrations]);
     }
 
+    //to show the blade of megrations
     public function create()
     {
         return view('admin.megrations.salary.add');
     }
 
+    /*  to decompres the zip file and save the datas in megrations table */
     public function store(Request $request)
     {
         try {
             if (megration::where("YEAR", $request->year)->where('Month', $request->month)->exists()) {
-                return redirect()->back()->with("error", "هذه الحزمة موجودة مسبقًا");
+                return   redirect()->with("هذا الحزمة موجودة مسبقا");
             }
 
-            if ($request->hasFile('megration')) {
-                $path_megration = self::SALARY_MEGRATION_FOLDER . DIRECTORY_SEPARATOR . $request->year . DIRECTORY_SEPARATOR . $request->month;
-
+            if (request()->hasFile('megration')) {
+                $path_megration = SalaryMegrationController::SALARY_MEGRATION_FOLDER . DIRECTORY_SEPARATOR . $request->year .  DIRECTORY_SEPARATOR . $request->month;
+                //unzip the zip file to file
                 $unzipper  = new \ZipArchive();
-                $file = $request->megration->store($path_megration);
-                $unzipper->open(self::storagePath() . DIRECTORY_SEPARATOR . $file);
-                $unzipper->extractTo(self::storagePath() . DIRECTORY_SEPARATOR . $path_megration . DIRECTORY_SEPARATOR . 'extracted');
+                $file = $request->megration->store($path_megration); //store file in storage/app/zip
+                $unzipper->open(SalaryMegrationController::storagePath() . DIRECTORY_SEPARATOR . $file);
+                $st = $unzipper->extractTo(SalaryMegrationController::storagePath() . DIRECTORY_SEPARATOR . $path_megration . DIRECTORY_SEPARATOR . 'extracted');
                 $unzipper->close();
-
-                $newMegration = new megration();
+                //store the megration table datas
+                $newMegration =  new  megration();
                 $newMegration->Month = $request->month;
                 $newMegration->YEAR = $request->year;
                 $newMegration->LOT = $request->LOT;
-                $newMegration->path = self::storagePath() . DIRECTORY_SEPARATOR . $path_megration . DIRECTORY_SEPARATOR . 'extracted';
+                // ***  change in database path data
+                $newMegration->path = SalaryMegrationController::storagePath() . DIRECTORY_SEPARATOR . $path_megration . DIRECTORY_SEPARATOR . 'extracted';
+                //$newMegration->log_path = storage_path($path_megration);
                 $newMegration->save();
-
-                return redirect()->route("admin-megration-salary-index")->with("success", "تم إضافة الحزمة بنجاح");
+                return redirect()->route("admin-megration-salary-index")->with("تم إضافة الحزمة بنجاح");
             }
-
-            return redirect()->back()->with("error", "حدث خطأ الرجاء التأكد من صحة البيانات");
+            return   redirect()->with("حدث خطأ الرجاء التأكد من صحة البيانات");
         } catch (\Exception $e) {
-            return redirect()->back()->with("error", $e->getMessage());
+            return $e->getMessage();
         }
+        return   redirect()->with("حدث خطأ الرجاء التأكد من صحة البيانات");
     }
 
+    //run megration with python script
+    /*  public function run_megration(Request $request)
+    {
+        $megration = megration::find($request->ID_MEGRATION);
+        if ($megration && $megration->STATUS == 0) {
+            $megration->STATUS = 1;
+            $megration->save();
+            $cammand = 'python ' . $this->script_path . ' ' . $request->ID_MEGRATION;
+            exec($cammand);
+        }
+    } */
 
+    //run megration with laravel php
     public function run_megration(Request $request)
     {
+
         set_time_limit(0);
+        //check the file existence
         ini_set('memory_limit', '-1');
-
         $megration = megration::where("ID_MEGRATION", $request->ID_MEGRATION)->first();
-        if (!$megration || $megration->STATUS != 0) {
-            return back()->withErrors(['error' => 'هذه الحزمة تم تنفيذها مسبقًا أو غير موجودة']);
+        //if the megration row not executed (status => 0)
+        if ($megration && $megration->STATUS == 0) {
+            //the megration row is executed Now (run => 1)
+            $megration->RUN = 1;
+            $megration->save();
+            mb_internal_encoding("UTF-8");
+            //if the folder path exisst
+            if (file_exists($megration->path)) {
+                //read the folder
+                $files = scandir($megration->path);
+                //This loop iterates over each file in the $files array.
+
+                // Fetch all existing MATRI values at once
+                //$existingMATRIs = Employee::pluck('MATRI')->toArray();
+                // dd( $existingMATRIs);
+
+                foreach ($files as $file) {
+
+                    //This condition checks if the current file name contains the string "RAVASIT".
+                    if (str_contains($file, "PAPERS")) {
+                        /*  use function processPapersFile to  to read excel file (in param file path)
+                         and return data[] ARRAY  */
+
+                        $data = $this->processPapersFile($megration->path . DIRECTORY_SEPARATOR . $file, $request->ID_MEGRATION);
+                        // dd( $data);
+                        /*   The data returned by processPapersFile is then inserted into the emp_megrations table
+                        in chunks of 1000 records to avoid memory overload.
+                        array_chunk is useful when you have a large dataset
+                        and you want to process it in smaller pieces
+                         to avoid memory exhaustion or to improve performance.*/
+                        foreach (array_chunk($data, 1000) as $t) {
+                            emp_megration::insert($t);
+                        }
+
+                        $empdata = $this->processPapersEmpFile($megration->path . DIRECTORY_SEPARATOR . $file, $request->ID_MEGRATION);
+                        //dd( $empdata);
+                        foreach (array_chunk($empdata, 1000) as $t) {
+                            employee::insertOrIgnore($t);
+                        }
+
+
+                        /*   $empdata = $this->processPapersEmpFile($megration->path . DIRECTORY_SEPARATOR . $file, $request->ID_MEGRATION);
+                       //dd( $empdata);
+                        foreach (array_chunk($empdata, 1000) as $d) {
+                            // Filter out records with existing MATRI values
+                            $filteredData = array_filter($d, function ($employee) use ($existingMATRIs) {
+                                return !in_array($employee['MATRI'], $existingMATRIs);
+                            });
+
+                            // Insert only new records
+                            if (!empty($filteredData)) {
+                              employee::insertOrIgnore($t);($filteredData);
+                            }
+                        }  */
+                        //dd( $filteredData);
+
+                    }
+                    elseif (str_contains($file, "PAVAR")) {
+                       // dd(1);
+                        //  use function processPavarFile to  to read excel file (in param file path)
+                        // and return data[] ARRAY
+                        $data = $this->processPavarFile($megration->path . DIRECTORY_SEPARATOR . $file, $request->ID_MEGRATION);
+                        
+                        //  The data returned by processPapersFile is then inserted into the grants table
+                        // in chunks of 1000 records to avoid memory overload.
+                        foreach (array_chunk($data, 1000) as $t) {
+                          //  dd($t);
+                            grant::insert($t);
+                        }
+                    }
+                }
+                // DB::commit();
+
+
+                //the megration row is finiched execution Now (run => 0)
+                $megration->RUN = 0;
+                //the megration row not executed (status => 1)
+                $megration->STATUS = 1;
+                $megration->ACTIVE = 1;
+
+                $megration->save();
+
+
+
+
+
+                $msg = "تم الرفع بنجاح";
+                return redirect()->route('admin-megration-salary-index')->with('success', $msg);
+            } else {
+                $msg = "الملف مفقود";
+                return redirect()->route('admin-megration-salary-index')->withErrors(['error' => $msg]);
+            }
         }
+    }
 
-        $megration->RUN = 1;
-        $megration->save();
+    //function to read excel file (in param file path) and return data[] ARRAY
+    private function processPapersFile($filePath, $ID_MEGRATION)
+    {
+        $header = null;
+        $data = [];
 
-        if (!file_exists($megration->path)) {
-            return back()->withErrors(['error' => 'مسار الملفات غير موجود']);
-        }
-
-        try {
-            DB::beginTransaction();
-
-            // 1️⃣ Temporary tables with utf8mb4
-            DB::statement("
-            CREATE TEMPORARY TABLE temp_employee_raw (
-                MATRI VARCHAR(50) NULL,
-                NOM VARCHAR(255) NULL,
-                PRENOM VARCHAR(255) NULL,
-                NOMA VARCHAR(255) NULL,
-                PRENOMA VARCHAR(255) NULL,
-                DATNAIS DATE NULL,
-                DATENT DATE NULL,
-                NUMSS VARCHAR(50) NULL,
-                AFFECT VARCHAR(50) NULL,
-                CODEFONC VARCHAR(50) NULL,
-                ADM VARCHAR(10) NULL,
-                SITFAM VARCHAR(10) NULL,
-                CATEG VARCHAR(10) NULL,
-                ECH VARCHAR(10) NULL,
-                SITPAI VARCHAR(10) NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-        ");
-
-            DB::statement("
-            CREATE TEMPORARY TABLE temp_salary_raw (
-                MATRI VARCHAR(50) NULL,
-                CODEFONC VARCHAR(255) NULL,
-                AFFECT VARCHAR(50) NULL,
-                SITFAM VARCHAR(255) NULL,
-                ENF10 VARCHAR(2) NULL,
-                CATEG VARCHAR(255) NULL,
-                ECH VARCHAR(255) NULL,
-                ADM VARCHAR(255) NULL,
-                TOTGAIN DECIMAL(14,2) NULL,
-                NETPAI DECIMAL(14,2) NULL,
-                NBRTRAV INT NULL,
-                BRUTSS DECIMAL(14,2) NULL,
-                RETSS DECIMAL(14,2) NULL,
-                PARTSS DECIMAL(14,2) NULL,
-                NUMCPT VARCHAR(50) NULL,
-                CLECPT VARCHAR(2) NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-        ");
-
-            DB::statement("
-            CREATE TEMPORARY TABLE temp_grant_raw (
-                MATRI VARCHAR(50) NULL,
-                IND VARCHAR(255) NULL,
-                ADM VARCHAR(255) NULL,
-                BASENBR DECIMAL(14,2) NULL,
-                TAUX DECIMAL(14,2) NULL,
-                MONTANT DECIMAL(14,2) NULL,
-                MFIX DECIMAL(14,2) NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-        ");
-
-            // 2️⃣ Load CSV files
-            $files = scandir($megration->path);
-
-            //dd( $files);
-            foreach ($files as $file) {
-                $fullPath = $megration->path . DIRECTORY_SEPARATOR . $file;
-                if (str_contains($file, 'PAPERS')) {
-                    $this->loadEmployees($fullPath);
-                    $this->loadSalaryPapers($fullPath);
-                } elseif (str_contains($file, 'PAVAR')) {
-                    $this->loadSalaryPavar($fullPath);
-                    //    dd(DB::select("SELECT COUNT(*) c FROM temp_grant_raw"));
+        if (($handle = fopen($filePath, 'r')) !== false) {
+            while (($row = fgetcsv($handle, 10000, ';')) !== false) {
+                if (!$header) {
+                    $header = $row;
+                    //dd($header);
+                } else {
+                    if ($row[16] == 0) {
+                        $data[] = [
+                            'MATRI' =>  strlen($row[0]) == 7 ? "000" . $row[0] : $row[0],
+                            'CODEFONC' => $row[12],
+                            'AFFECT' => $row[25],
+                            'SITFAM' => $row[9],
+                            'ENF10' => $row[10],
+                            'CATEG' => $row[27],
+                            'ECH' => $row[29],
+                            'ADM' => $row[2],
+                            'TOTGAIN' => $row[38],
+                            'NETPAI' =>  !empty($row[41]) ? $row[41] : null,
+                            'NBRTRAV' => $row[49],
+                            'BRUTSS' =>  !empty($row[35]) ? $row[35] : null,
+                            'RETSS' =>  !empty($row[36]) ? $row[36] : null,
+                            'NUMCPT' => $row[23],
+                            'PARTSS' =>  !empty($row[58]) ? $row[58] : null,
+                            'CLECPT' => $row[61],
+                            // Assuming 'ID_MEGRATION_RA' is not included in the CSV file
+                            // You can remove this line if ID_MEGRATION_RA is not needed from CSV
+                            'ID_MEGRATION' => $ID_MEGRATION,
+                        ];
+                    }
                 }
             }
-
-            // 3️⃣ Insert / Update employees
-            DB::statement("
-           INSERT INTO employees (
-    MATRI, NOM, PRENOM, NOMA, PRENOMA, DATNAIS, DATENT, NUMSS, AFFECT, CODEFONC, ADM, SITFAM, CATEG, ECH, SITPAI
-)
-SELECT 
-    MATRI,
-    SUBSTRING(NOM,1,20),
-    SUBSTRING(PRENOM,1,20),
-    SUBSTRING(NOMA,1,20),
-    SUBSTRING(PRENOMA,1,20),
-    NULLIF(DATNAIS,'0000-00-00'),
-    NULLIF(DATENT,'0000-00-00'),
-    NUMSS,
-     CASE WHEN AFFECT REGEXP '^[0-9]+$' THEN CAST(AFFECT AS UNSIGNED) ELSE 0 END,
-    SUBSTRING(CODEFONC,1,6),
-    LEFT(ADM,1),
-    LEFT(SITFAM,3),
-    LEFT(CATEG,2),
-    LEFT(ECH,2),
-    IF(TRIM(SITPAI) = '' OR SITPAI IS NULL, 0, LEFT(TRIM(SITPAI), 1))
-FROM temp_employee_raw
-ON DUPLICATE KEY UPDATE
-    NOM = VALUES(NOM),
-    PRENOM = VALUES(PRENOM),
-    NOMA = VALUES(NOMA),
-    PRENOMA = VALUES(PRENOMA),
-    SITPAI = VALUES(SITPAI),
-    DATNAIS = CASE WHEN VALUES(SITPAI) = 0 THEN VALUES(DATNAIS) ELSE DATNAIS END,
-    DATENT = CASE WHEN VALUES(SITPAI) = 0 THEN VALUES(DATENT) ELSE DATENT END,
-    NUMSS = CASE WHEN VALUES(SITPAI) = 0 THEN VALUES(NUMSS) ELSE NUMSS END,
-    AFFECT = CASE WHEN VALUES(SITPAI) = 0 THEN VALUES(AFFECT) ELSE AFFECT END,
-    CODEFONC = CASE WHEN VALUES(SITPAI) = 0 THEN VALUES(CODEFONC) ELSE CODEFONC END,
-    ADM = CASE WHEN VALUES(SITPAI) = 0 THEN VALUES(ADM) ELSE ADM END,
-    SITFAM = CASE WHEN VALUES(SITPAI) = 0 THEN VALUES(SITFAM) ELSE SITFAM END,
-    CATEG = CASE WHEN VALUES(SITPAI) = 0 THEN VALUES(CATEG) ELSE CATEG END,
-    ECH = CASE WHEN VALUES(SITPAI) = 0 THEN VALUES(ECH) ELSE ECH END;
-        ");
-
-            // 4️⃣ Insert into emp_megrations
-            DB::statement("
-            INSERT INTO emp_megrations (
-                MATRI, CODEFONC, AFFECT, SITFAM, ENF10, CATEG, ECH, ADM, TOTGAIN, NETPAI, 
-                NBRTRAV, BRUTSS, RETSS, NUMCPT, PARTSS, CLECPT, ID_MEGRATION
-            )
-            SELECT 
-                  MATRI,
-    LEFT(CODEFONC,6),
-    CASE 
-        WHEN TRIM(AFFECT) REGEXP '^[0-9]+$' THEN CAST(TRIM(AFFECT) AS UNSIGNED) 
-        ELSE 0 
-    END,
-    LEFT(SITFAM,3),
-    ENF10,
-    LEFT(CATEG,2),
-    LEFT(ECH,2),
-    LEFT(ADM,1),
-    TOTGAIN,
-    NETPAI,
-    NBRTRAV,
-    BRUTSS,
-    RETSS,
-    NUMCPT,
-    PARTSS,
-    CLECPT,
-                {$megration->ID_MEGRATION}
-            FROM temp_salary_raw
-        ");
-
-            // 5️⃣ Insert grants
-            DB::statement("
-            INSERT INTO grants_new (
-                MATRI, IND, ADM, BASENBR, TAUX, MONTANT, MFIX, ID_MEGRATION
-            )
-            SELECT 
-                 MATRI,
-    LEFT(IND,3),
-    LEFT(ADM,1),
-    BASENBR,
-    TAUX,
-    MONTANT,
-    MFIX,
-                {$megration->ID_MEGRATION}
-            FROM temp_grant_raw
-        ");
-
-            DB::commit();
-
-            $megration->RUN = 0;
-            $megration->STATUS = 1;
-            $megration->ACTIVE = 1;
-            $megration->save();
-
-            return redirect()->route('admin-megration-salary-index')->with('success', 'تم تحديث الرواتب بنجاح');
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            $megration->RUN = 0;
-            $megration->save();
-            return back()->withErrors(['error' => $e->getMessage()]);
+            fclose($handle);
         }
+        return $data;
     }
 
 
-    // باقي الدوال loadEmployees, loadSalaryPapers, loadSalaryPavar تبقى كما هي مع CHARACTER SET utf8mb4
-
-    private function loadEmployees($filePath)
+    //function to read excel file (in param file path) and return data[] ARRAY
+    private function processPapersEmpFile($filePath, $ID_MEGRATION)
     {
-        $absolutePath = realpath($filePath);
-        $file = fopen($absolutePath, 'r');
-        
-        // Skip header
-        fgets($file);
+        $header = null;
+        $data = [];
+        $sourceEncoding = 'Windows-1256'; // Specify the excel source encoding here
 
-        $batch = [];
-        while (($line = fgets($file)) !== false) {
-            // Convert encoding if needed
-            if (!mb_check_encoding($line, 'UTF-8')) {
-                $line = @iconv('CP1256', 'UTF-8//IGNORE', $line) ?:
-                        @iconv('ISO-8859-6', 'UTF-8//IGNORE', $line) ?:
-                        @iconv('Windows-1256', 'UTF-8//IGNORE', $line) ?: $line;
+        if (($handle = fopen($filePath, 'r')) !== false) {
+            while (($row = fgetcsv($handle, 10000, ';')) !== false) {
+
+                // Convert each field to UTF-8 using iconv
+                $row = array_map(function ($field) use ($sourceEncoding) {
+                    $convertedField = iconv($sourceEncoding, 'UTF-8//IGNORE', $field);
+                    if ($convertedField === false) {
+                        throw new Exception("Error converting field encoding from $sourceEncoding to UTF-8");
+                    }
+                    return $convertedField;
+                }, $row);
+
+                if (!$header) {
+                    $header = $row;
+                    //  dd($header);
+                } else {
+
+                    if ($row[16] == 0) {
+                        $data[] = [
+                            'MATRI' =>  strlen($row[0]) == 7 ? "000" . $row[0] : $row[0],
+                            'NOM' => $row[3],
+                            'PRENOM' => $row[4],
+                            'NOMA' => $row[5],
+                            'PRENOMA' => $row[6],
+                            'DATNAIS' => !empty($row[8]) ? Carbon::parse($row[8]) : null,
+                            'DATENT' => !empty($row[13]) ? Carbon::parse($row[13]) : null,
+                            'NUMSS' => $row[18],
+                            'AFFECT' => $row[25],
+                            'CODEFONC' => $row[12],
+                            'ADM' => $row[2],
+                            'SITFAM' => $row[9],
+                            'CATEG' => $row[27],
+                            'ECH' => $row[29],
+                            // Assuming 'ID_MEGRATION_RA' is not included in the CSV file
+                            // You can remove this line if ID_MEGRATION_RA is not needed from CSV
+                            //'ID_MEGRATION' => $ID_MEGRATION,
+                        ];
+                    }
+                }
             }
-
-            $data = str_getcsv($line, ';');
-            if (count($data) < 30) continue;
-
-            $batch[] = [
-                'MATRI'    => (strlen($data[0]) == 7) ? '000' . $data[0] : $data[0],
-                'NOM'      => $data[3],
-                'PRENOM'   => $data[4],
-                'NOMA'     => $data[5],
-                'PRENOMA'  => $data[6],
-                'DATNAIS'  => ($data[8] == '0000-00-00' || empty($data[8])) ? null : $data[8],
-                'DATENT'   => ($data[13] == '0000-00-00' || empty($data[13])) ? null : $data[13],
-                'NUMSS'    => $data[18],
-                'AFFECT'   => preg_match('/^[0-9]+$/', $data[25]) ? (int)$data[25] : 0,
-                'CODEFONC' => $data[12],
-                'ADM'      => $data[2],
-                'SITFAM'   => $data[9],
-                'CATEG'    => $data[27],
-                'ECH'      => $data[29],
-                'SITPAI'   => $data[16] ?? 0,
-            ];
-
-            if (count($batch) >= 500) {
-                DB::table('temp_employee_raw')->insert($batch);
-                $batch = [];
-            }
+            fclose($handle);
         }
-        if (!empty($batch)) {
-            DB::table('temp_employee_raw')->insert($batch);
-        }
-        fclose($file);
+        return $data;
     }
 
-    private function loadSalaryPapers($filePath)
+    //function to read excel file (in param file path) and return data[] ARRAY
+    private function processPavarFile($filePath, $ID_MEGRATION)
     {
-        $absolutePath = realpath($filePath);
-        $file = fopen($absolutePath, 'r');
-        fgets($file);
+        $header = null;
+        $data = [];
+        if (($handle = fopen($filePath, 'r')) !== false) {
+            while (($row = fgetcsv($handle, 10000, ';')) !== false) {
 
-        $batch = [];
-        while (($line = fgets($file)) !== false) {
-            $data = str_getcsv($line, ';');
-            if (count($data) < 62) continue;
+                if (!$header) {
+                    $header = $row;
+                } else {
+                    $data[] = [
+                        'MATRI' =>  strlen($row[0]) == 7 ? "000" . $row[0] : $row[0],
+                        'IND' => $row[3],
+                        'ADM' => $row[4],
+                        'BASENBR' => $row[5],
+                        'TAUX' =>  !empty($row[6]) ? $row[6] : null,
+                        'MONTANT' =>  !empty($row[7]) ? $row[7] : null,
+                        'MFIX' =>  !empty($row[8]) ? $row[8] : null,
 
-            $batch[] = [
-                'MATRI'    => (strlen($data[0]) == 7) ? '000' . $data[0] : $data[0],
-                'CODEFONC' => $data[12],
-                'AFFECT'   => $data[25],
-                'SITFAM'   => $data[9],
-                'ENF10'    => $data[10],
-                'CATEG'    => $data[27],
-                'ECH'      => $data[29],
-                'ADM'      => $data[2],
-                'TOTGAIN'  => empty($data[38]) ? 0 : (float)$data[38],
-                'NETPAI'   => empty($data[41]) ? 0 : (float)$data[41],
-                'NBRTRAV'  => (int)$data[49],
-                'BRUTSS'   => empty($data[35]) ? 0 : (float)$data[35],
-                'RETSS'    => empty($data[36]) ? 0 : (float)$data[36],
-                'NUMCPT'   => $data[23],
-                'PARTSS'   => empty($data[58]) ? 0 : (float)$data[58],
-                'CLECPT'   => $data[61] ?? '',
-            ];
-
-            if (count($batch) >= 500) {
-                DB::table('temp_salary_raw')->insert($batch);
-                $batch = [];
+                        // Assuming 'ID_MEGRATION_RA' is not included in the CSV file
+                        // You can remove this line if ID_MEGRATION_RA is not needed from CSV
+                        'ID_MEGRATION' => $ID_MEGRATION,
+                    ];
+                }
             }
+            fclose($handle);
         }
-        if (!empty($batch)) {
-            DB::table('temp_salary_raw')->insert($batch);
-        }
-        fclose($file);
+        return $data;
     }
-
-    private function loadSalaryPavar($filePath)
-    {
-        $absolutePath = realpath($filePath);
-        $file = fopen($absolutePath, 'r');
-        fgets($file);
-
-        $batch = [];
-        while (($line = fgets($file)) !== false) {
-            $data = str_getcsv($line, ';');
-            if (count($data) < 9) continue;
-
-            $batch[] = [
-                'MATRI'   => $data[0],
-                'IND'     => $data[3],
-                'ADM'     => $data[4],
-                'BASENBR' => empty($data[5]) ? 0 : (float)$data[5],
-                'TAUX'    => empty($data[6]) ? 0 : (float)$data[6],
-                'MONTANT' => empty($data[7]) ? 0 : (float)$data[7],
-                'MFIX'    => empty($data[8]) ? 0 : (float)$data[8],
-            ];
-
-            if (count($batch) >= 500) {
-                DB::table('temp_grant_raw')->insert($batch);
-                $batch = [];
-            }
-        }
-        if (!empty($batch)) {
-            DB::table('temp_grant_raw')->insert($batch);
-        }
-        fclose($file);
-    }
-
 
     public function delete(Request $request)
     {
         DB::beginTransaction();
         $megration = megration::find($request->ID_MEGRATION);
+        $megration->delete();
+        File::deleteDirectory($megration->path);
         emp_megration::where("ID_MEGRATION", $request->ID_MEGRATION)->delete();
         grant::where("ID_MEGRATION", $request->ID_MEGRATION)->delete();
-        File::deleteDirectory($megration->path);
-        $megration->delete();
         DB::commit();
         return redirect()->back();
+    }
+
+
+
+    public function stat($ID_MEGRATION)
+    {  //////////////////// with calculate every time  ///////////////////////////////////////
+        /*    $stat_megration = emp_megration::join('megrations', 'emp_megrations.ID_MEGRATION', '=', 'megrations.ID_MEGRATION')
+            ->where('emp_megrations.ID_MEGRATION', $ID_MEGRATION)
+            ->select(
+                'megrations.ID_MEGRATION',
+                'megrations.MONTH',
+                'megrations.YEAR' ,
+                'megrations.LOT'
+            )
+            ->selectRaw('
+                    COUNT(emp_megrations.MATRI) as nbr_employees, 
+                    SUM(emp_megrations.NETPAI) as total_NETPAI, 
+                    SUM(emp_megrations.TOTGAIN) as total_TOTGAIN, 
+                    SUM(emp_megrations.RETSS) as total_RETSS, 
+                    SUM(emp_megrations.PARTSS) as total_PARTSS
+                ')
+            ->groupBy('megrations.ID_MEGRATION', 'megrations.MONTH', 'megrations.YEAR' ,'megrations.LOT')
+            ->first();
+              $megration = megration::where('ID_MEGRATION', $ID_MEGRATION);
+            $megration->nbr_employees=$stat_megration->nbr_employees;
+            $megration->total_NETPAI=$stat_megration->total_NETPAI;
+            $megration->total_TOTGAIN=$stat_megration->total_TOTGAIN;
+            $megration->total_RETSS=$stat_megration->total_RETSS;
+            $megration->total_PARTSS=$stat_megration->total_PARTSS;
+            $megration->save();  
+        return response()->json($stat_megration); */
+
+        //////////////////// with table stat_emp_megrations /////////////////////////////
+        /*      // Check if the statistics already exist in the stat_emp_megrations table
+    $stat_record = stat_emp_megration::where('ID_MEGRATION', $ID_MEGRATION)->first();
+    if ($stat_record) {
+        // Return the saved statistics
+        return response()->json($stat_record);
+    }
+    // Calculate the statistics if not already saved
+    $stat_megration = emp_megration::join('megrations', 'emp_megrations.ID_MEGRATION', '=', 'megrations.ID_MEGRATION')
+        ->where('emp_megrations.ID_MEGRATION', $ID_MEGRATION)
+        ->select(
+            'megrations.ID_MEGRATION',
+            'megrations.MONTH',
+            'megrations.YEAR',
+            'megrations.LOT'
+        )
+        ->selectRaw('
+            COUNT(emp_megrations.MATRI) as nbr_employees, 
+            SUM(emp_megrations.NETPAI) as total_NETPAI, 
+            SUM(emp_megrations.TOTGAIN) as total_TOTGAIN, 
+            SUM(emp_megrations.RETSS) as total_RETSS, 
+            SUM(emp_megrations.PARTSS) as total_PARTSS
+        ')
+        ->groupBy('megrations.ID_MEGRATION', 'megrations.MONTH', 'megrations.YEAR', 'megrations.LOT')
+        ->first();
+    if ($stat_megration) {
+        // Save the statistics in the stat_emp_megrations table
+        $stat_record = stat_emp_megration::create([
+            'ID_MEGRATION' => $stat_megration->ID_MEGRATION,
+            'MONTH' => $stat_megration->MONTH,
+            'YEAR' => $stat_megration->YEAR,
+            'LOT' => $stat_megration->LOT, 
+            'nbr_employees' => $stat_megration->nbr_employees,
+            'total_NETPAI' => $stat_megration->total_NETPAI,
+            'total_TOTGAIN' => $stat_megration->total_TOTGAIN,
+            'total_RETSS' => $stat_megration->total_RETSS,
+            'total_PARTSS' => $stat_megration->total_PARTSS,
+        ]);
+    }
+    // Return the saved statistics
+    return response()->json($stat_record); */
+
+        //////////////////// with table megrations ///////////////////////////////////
+        // Check if the statistics already exist in the megration table
+        $megration = megration::where('ID_MEGRATION', $ID_MEGRATION)->first();
+
+        // If the statistics are already saved, return them
+        if ($megration && $megration->nbr_employees !== null) {
+            return response()->json($megration);
+        }
+
+        // Calculate the statistics if not already saved
+        $stat_megration = emp_megration::join('megrations', 'emp_megrations.ID_MEGRATION', '=', 'megrations.ID_MEGRATION')
+            ->where('emp_megrations.ID_MEGRATION', $ID_MEGRATION)
+            ->select(
+                'megrations.ID_MEGRATION',
+                'megrations.MONTH',
+                'megrations.YEAR',
+                'megrations.LOT'
+            )
+            ->selectRaw('
+            COUNT(emp_megrations.MATRI) as nbr_employees, 
+            SUM(emp_megrations.NETPAI) as total_NETPAI, 
+            SUM(emp_megrations.TOTGAIN) as total_TOTGAIN, 
+            SUM(emp_megrations.RETSS) as total_RETSS, 
+            SUM(emp_megrations.PARTSS) as total_PARTSS
+        ')
+            ->groupBy('megrations.ID_MEGRATION', 'megrations.MONTH', 'megrations.YEAR', 'megrations.LOT')
+            ->first();
+
+        if ($stat_megration) {
+            // Update the existing row with the calculated statistics
+            $megration->update([
+                'nbr_employees' => $stat_megration->nbr_employees,
+                'total_NETPAI' => $stat_megration->total_NETPAI,
+                'total_TOTGAIN' => $stat_megration->total_TOTGAIN,
+                'total_RETSS' => $stat_megration->total_RETSS,
+                'total_PARTSS' => $stat_megration->total_PARTSS,
+            ]);
+        }
+
+        // Return the updated row
+        return response()->json($megration);
     }
 }

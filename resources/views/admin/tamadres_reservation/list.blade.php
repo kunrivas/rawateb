@@ -65,7 +65,7 @@
                                             <input type="hidden" name="id"
                                                 value="{{ $tamadresReservation->tamadres_reservation_id }}">
                                             {{--   change the value of sent status between 0 and 1  --}}
-                                            <input type="hidden" name="status"
+                                            <input type="hidden" name="sitpai"
                                                 value="@if ($tamadresReservation->STATUS == 1) 0 @else 1 @endif">
                                             {{--  change the value of label of btn between غلق and فتح --}}
                                             <button type="submit" class="dropdown-item font-weight-bold " href="#">

@@ -70,8 +70,8 @@ class EmployeeController extends Controller
             "NOMA" => "required",
             "PRENOM" => "required",
             "NOM" => "required",
-          /*   "DATNAIS" => "required", */
-           /*  "DATENT" => "required", */
+            "DATNAIS" => "required",
+            "DATENT" => "required",
             /*   "NUMSS" => "required",
             "ADM" => "required",
             "SITFAM" => "required",

@@ -62,10 +62,5 @@ class rappel_megration extends Model
         return $this->hasMany(rappel_grant::class,"MATRI","MATRI")->where("ID_MEGRATION_RA",$this->ID_MEGRATION_RA)->where("ADM",$this->ADM)->where("SEQ", $this->SEQ)->where("OLDNEW", "N")->orderBy("IND", "ASC");
     }   
 
-    public function old_rappel_grants()
-    {
-        return $this->hasMany(rappel_grant::class,"MATRI","MATRI")->where("ID_MEGRATION_RA",$this->ID_MEGRATION_RA)->where("ADM",$this->ADM)->where("SEQ", $this->SEQ)->where("OLDNEW", "A")->orderBy("IND", "ASC");
-    } 
-
      
 }

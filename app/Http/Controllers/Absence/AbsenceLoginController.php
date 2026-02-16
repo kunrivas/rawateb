@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Validator;
 
@@ -30,7 +31,10 @@ class AbsenceLoginController extends Controller
             return redirect()->back()->withErrors(['اسم المستخدم غير موجود']);
         }
 
-        if (Crypt::decrypt($user->user_password) !== $request->input('password')) {
+        // if (Crypt::decrypt($user->user_password) !== $request->input('password')) {
+        //     return redirect()->back()->withErrors(['كلمة المرور خاطئة']);
+        // }
+        if (!Hash::check($request->input('password'), $user->user_password)) {
             return redirect()->back()->withErrors(['كلمة المرور خاطئة']);
         }
 

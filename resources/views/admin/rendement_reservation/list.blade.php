@@ -66,7 +66,7 @@
                                             @csrf
                                           <input type="hidden" name="id" value="{{ $rendementReservation->id }}">
                                             {{-- condition if status to modify value of input hidden --}}
-                                            <input type="hidden" name="status"
+                                            <input type="hidden" name="sitpai"
                                                 value="@if ($rendementReservation->status) 0 @else 1 @endif">
                                              {{-- condition if status to modify the btn --}}
                                            <button type="submit" class="dropdown-item font-weight-bold " href="#">

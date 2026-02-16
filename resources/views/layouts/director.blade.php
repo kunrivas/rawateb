@@ -315,8 +315,8 @@
                             <!-- Add icons to the links using the .nav-icon class
                              with font-awesome or any other icon font library -->
 
-                             
-                             <li class="nav-header">مراسلة الخزينة العمومية </li>
+
+                            <li class="nav-header">مراسلة الخزينة العمومية </li>
 
                             <li
                                 class="nav-item has-treeview {{ request()->is('manager/tresor/*') ? 'menu-open' : '' }} ">
@@ -337,7 +337,7 @@
                                         </a>
                                     </li>
 
-                                   {{--   <li class="nav-item">
+                                    {{--   <li class="nav-item">
                                         <a href={{ route('admin-tresor-stat') }} class="nav-link ">
                                             <i class="fa fa-circle-o nav-icon"></i>
                                             <p> مراقبة العملية</p>
@@ -351,8 +351,10 @@
                             </li>
                             <li class="nav-header"> نفقات المستخدمين</li>
 
-                            <li class="nav-item has-treeview {{ request()->is('director/salary/*') ? 'menu-open' : '' }} ">
-                                <a href="#" class="nav-link {{ request()->is('director/salary/*') ? 'active' : '' }}">
+                            <li
+                                class="nav-item has-treeview {{ request()->is('director/salary/*') ? 'menu-open' : '' }} ">
+                                <a href="#"
+                                    class="nav-link {{ request()->is('director/salary/*') ? 'active' : '' }}">
                                     <i class="nav-icon fa fa-dashboard"></i>
                                     <p>
                                         الراتب
@@ -362,7 +364,7 @@
                                 <ul class="nav nav-treeview">
 
                                     <li class="nav-item">
-                                        <a href="{{ route("director-salary-single-employees") }}" class="nav-link ">
+                                        <a href="{{ route('director-salary-single-employees') }}" class="nav-link ">
                                             <i class="fa fa-circle-o nav-icon"></i>
                                             <p>كشف الراتب الفردي</p>
                                         </a>
@@ -372,8 +374,10 @@
                                 </ul>
                             </li>
 
-                            <li class="nav-item has-treeview {{ request()->is('director/rendement/*') ? 'menu-open' : '' }} ">
-                                <a href="#" class="nav-link {{ request()->is('director/rendement/*') ? 'active' : '' }}">
+                            <li
+                                class="nav-item has-treeview {{ request()->is('director/rendement/*') ? 'menu-open' : '' }} ">
+                                <a href="#"
+                                    class="nav-link {{ request()->is('director/rendement/*') ? 'active' : '' }}">
                                     <i class="nav-icon fa fa-dashboard"></i>
                                     <p>
                                         المردودية
@@ -394,8 +398,10 @@
                             </li>
                             </li>
 
-                            <li class="nav-item has-treeview {{ request()->is('director/absence/*') ? 'menu-open' : '' }} ">
-                                <a href="#" class="nav-link {{ request()->is('director/absence/*') ? 'active' : '' }}">
+                            <li
+                                class="nav-item has-treeview {{ request()->is('director/absence/*') ? 'menu-open' : '' }} ">
+                                <a href="#"
+                                    class="nav-link {{ request()->is('director/absence/*') ? 'active' : '' }}">
                                     <i class="nav-icon fa fa-dashboard"></i>
                                     <p>
                                         الغيابات
@@ -414,8 +420,10 @@
 
                                 </ul>
                             </li>
-                            <li class="nav-item has-treeview {{ request()->is('director/ats/*') ? 'menu-open' : '' }} ">
-                                <a href="#" class="nav-link {{ request()->is('director/ats/*') ? 'active' : '' }}">
+                            <li
+                                class="nav-item has-treeview {{ request()->is('director/ats/*') ? 'menu-open' : '' }} ">
+                                <a href="#"
+                                    class="nav-link {{ request()->is('director/ats/*') ? 'active' : '' }}">
                                     <i class="nav-icon fa fa-dashboard"></i>
                                     <p>
                                         كشف العمل والاجر
@@ -437,73 +445,73 @@
 
                             <li class="nav-header">الحركة</li>
                             @if ($period_mouv == 1)
-                            {{-- ✅ Movement period is OPEN --}}
-                            <li
-                                class="nav-item has-treeview {{ request()->is('director/mouvement/*') ? 'menu-open' : '' }} ">
-                                <a href="#"
-                                    class="nav-link {{ request()->is('director/mouvement/*') ? 'active' : '' }}">
-                                    <i class="nav-icon fa fa-dashboard"></i>
-                                    <p>
-                                        إدارة الحركة
-                                        <i class="right fa fa-angle-left"></i>
-                                    </p>
-                                </a>
-                                <ul class="nav nav-treeview">
+                                {{-- ✅ Movement period is OPEN --}}
+                                <li
+                                    class="nav-item has-treeview {{ request()->is('director/mouvement/*') ? 'menu-open' : '' }} ">
+                                    <a href="#"
+                                        class="nav-link {{ request()->is('director/mouvement/*') ? 'active' : '' }}">
+                                        <i class="nav-icon fa fa-dashboard"></i>
+                                        <p>
+                                            إدارة الحركة
+                                            <i class="right fa fa-angle-left"></i>
+                                        </p>
+                                    </a>
+                                    <ul class="nav nav-treeview">
 
-                                    <li class="nav-item">
-                                        <a href={{ route('director-mouvement-single-employees') }}
-                                            class="nav-link  ">
-                                            <i class="fa fa-circle-o nav-icon"></i>
-                                            <p>طلب تحويل موظف</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href={{ route('director-mouvement-single-in-employees') }}
-                                            class="nav-link  ">
-                                            <i class="fa fa-circle-o nav-icon"></i>
-                                            @if (isset($inMouvcount) && $inMouvcount > 0)
-                                            <!-- There are rows that match the conditions -->
-                                            <!-- You can use $inMouvcount here -->
-                                            <p>
-                                                <span class="text">معالجة الطلبات المرسلة</span>
-                                                <span
-                                                    class="  badge badge-success mouv-title">{{ $inMouvcount }}</span>
-                                            </p>
-                                            @else
-                                            <p>
-                                                <span class="text">معالجة الطلبات المرسلة</span>
-                                                <span class=" badge badge-success mouv-title ">0</span>
-                                            </p>
-                                            @endif
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href={{ route('director-mouvement-single-out-employees') }}
-                                            class="nav-link  ">
-                                            <i class="fa fa-circle-o nav-icon"></i>
-                                            @if (isset($outMouvcount) && $outMouvcount > 0)
-                                            <p>
-                                                <span class="text">معالجة الطلبات الواردة</span>
-                                                <span
-                                                    class="badge badge-danger mouv-title ">{{ $outMouvcount }}</span>
-                                            </p>
-                                            @else
-                                            <p>
-                                                <span class="text">معالجة الطلبات الواردة</span>
-                                                <span class="badge badge-danger mouv-title ">0</span>
-                                            </p>
-                                            @endif
-                                        </a>
-                                    </li>
+                                        <li class="nav-item">
+                                            <a href={{ route('director-mouvement-single-employees') }}
+                                                class="nav-link  ">
+                                                <i class="fa fa-circle-o nav-icon"></i>
+                                                <p>طلب تحويل موظف</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href={{ route('director-mouvement-single-in-employees') }}
+                                                class="nav-link  ">
+                                                <i class="fa fa-circle-o nav-icon"></i>
+                                                @if (isset($inMouvcount) && $inMouvcount > 0)
+                                                    <!-- There are rows that match the conditions -->
+                                                    <!-- You can use $inMouvcount here -->
+                                                    <p>
+                                                        <span class="text">معالجة الطلبات المرسلة</span>
+                                                        <span
+                                                            class="  badge badge-success mouv-title">{{ $inMouvcount }}</span>
+                                                    </p>
+                                                @else
+                                                    <p>
+                                                        <span class="text">معالجة الطلبات المرسلة</span>
+                                                        <span class=" badge badge-success mouv-title ">0</span>
+                                                    </p>
+                                                @endif
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href={{ route('director-mouvement-single-out-employees') }}
+                                                class="nav-link  ">
+                                                <i class="fa fa-circle-o nav-icon"></i>
+                                                @if (isset($outMouvcount) && $outMouvcount > 0)
+                                                    <p>
+                                                        <span class="text">معالجة الطلبات الواردة</span>
+                                                        <span
+                                                            class="badge badge-danger mouv-title ">{{ $outMouvcount }}</span>
+                                                    </p>
+                                                @else
+                                                    <p>
+                                                        <span class="text">معالجة الطلبات الواردة</span>
+                                                        <span class="badge badge-danger mouv-title ">0</span>
+                                                    </p>
+                                                @endif
+                                            </a>
+                                        </li>
 
 
-                                </ul>
-                            </li>
+                                    </ul>
+                                </li>
                             @else
-                            {{-- 🚫 Movement period is CLOSED --}}
-                            <li class="nav-header text-danger">
-                                <h6 class="text-center ">🚫 الحركة مغلقة حاليا</h6>
-                            </li>
+                                {{-- 🚫 Movement period is CLOSED --}}
+                                <li class="nav-header text-danger">
+                                    <h6 class="text-center ">🚫 الحركة مغلقة حاليا</h6>
+                                </li>
                             @endif
 
 
@@ -537,17 +545,17 @@
                 @if (isset($notes) && $notes->count() > 0)
 
 
-                <marquee direction="right" class="news-banner " loop="">
-                    <span class='d-flex' id="news-banner">
-                        @foreach ($notes as $note)
-                        <div class="{{ $note->type == 1 ? 'good' : '' }} {{ $note->type == 2 ? 'bad' : '' }} {{ $note->type == 3 ? 'warning' : '' }}"
-                            style="margin-right : 50px;"> {{ $note->text }} </div>
-                        @if (!$loop->last)
-                        <div style="margin-right : 50px;"> -- </div>
-                        @endif
-                        @endforeach
-                    </span>
-                </marquee>
+                    <marquee direction="right" class="news-banner " loop="">
+                        <span class='d-flex' id="news-banner">
+                            @foreach ($notes as $note)
+                                <div class="{{ $note->type == 1 ? 'good' : '' }} {{ $note->type == 2 ? 'bad' : '' }} {{ $note->type == 3 ? 'warning' : '' }}"
+                                    style="margin-right : 50px;"> {{ $note->text }} </div>
+                                @if (!$loop->last)
+                                    <div style="margin-right : 50px;"> -- </div>
+                                @endif
+                            @endforeach
+                        </span>
+                    </marquee>
                 @endif
 
             </div>

@@ -60,7 +60,7 @@
                         </div>
                         <div class="form-group">
                             <label>الحالة</label>
-                            <select class="form-control" name="status" required>
+                            <select class="form-control" name="sitpai" required>
                                 <option selected>اختر</option>
                                     <option value="1">مفعل</option>
                                     <option value="0">موقف</option>

@@ -157,7 +157,7 @@ class RendementReservationController extends Controller
             return  $rendement_reservation->employee->ADM;
         });
         $mpdf = new CMPDF();
-        $rendement_reservations_statistic->status = 1;
+        $rendement_reservations_statistic->SITPAI = 1;
         $rendement_reservations_statistic->save();
 
         /*

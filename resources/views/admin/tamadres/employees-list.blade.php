@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 {{-- linked by yield in parent view --}}
 @section('title')
-    كشف الإقتطاعات الفردي
+    كشف منحة التمدرس الفردي
 @endsection
 {{-- linked by yield in parent view --}}
 @section('content-title')
@@ -9,7 +9,7 @@
 @endsection
 {{-- linked by yield in parent view --}}
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="#">كشف الإقتطاعات</a></li>
+    <li class="breadcrumb-item"><a href="#">كشف منحة التمدرس</a></li>
     <li class="breadcrumb-item"><a href="#">فردي</a></li>
 @endsection
 @section('css')
@@ -27,7 +27,7 @@
             <div class="mt-4">
 
                 <form method="post" action="{{ route('admin-tamadres-single-employees') }}">
-                     @csrf
+                    @csrf
                     <div class="col-6 input-group mb-3 row">
                         {{--  label search --}}
                         <div class="col-2  text-center">إبحث عن</div>
@@ -72,6 +72,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        </div>
                                         {{--   the part  of adms  --}}
                                         <div class="col-6" style="border-right: 0.5px solid #dfd9d9;padding-right: 10px;">
                                             <h5 style="text-align: right">الادارة</h5>
@@ -115,7 +116,7 @@
                             <th scope="col">اللقب</th>
                             <th scope="col">تاريخ الميلاد</th>
                             <th scope="col">رقم الضمان الاجتماعي</th>
-                            <th scope="col"> العمليات</th>
+                            <th scope="col">نوع كشف منحة التمدرس</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -138,7 +139,7 @@
 
                                     <div class="d-flex justify-content-center ml-2 ">
                                         <a href="{{ route('admin-tamadres-single-list', ['MATRI' => $employee->MATRI]) }}"
-                                            class="btn text-white btn-primary  ml-2">كشف الإقتطاعات الفردي</a>
+                                            class="btn text-white btn-primary  ml-2">كشف منحة التمدرس</a>
                                         {{-- <a href="{{ route('salary-single-year-list', ['MATRI' => $employee->MATRI]) }}"
                                             class="btn text-white btn-success">السنوي</a> --}}
                                     </div>

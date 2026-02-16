@@ -9,7 +9,7 @@ class RendementReservationEmployee extends Model
 {
 
     protected $fillable = [
-        'MATRI', "point", "rendement_reservation_id","abs","affect","estab_mail_code",
+        'MATRI', "point", "rendement_reservation_id","abs","affect","estab_mail_code"
     ];
 
     public function employee(){

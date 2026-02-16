@@ -1,5 +1,5 @@
 @php
-
+   
     $_retenues_inds = [610, 980, 660, 399, 397, 398, 999];
     $_primes_family_inds = [992, 991, 990, 401];
     $_primes_base_inds = [001, 101];
@@ -123,22 +123,14 @@
         <td colspan="3" class="font16"> مديرية التربية لولاية الوادي </td>
     </tr>
     <tr>
-        <td colspan="3"> <span>المؤسسة: </span><span>
-                @if (is_null(session()->get('establishment')))
-                    /@else{{ session()->get('establishment')->estab_ar_name }}
-                @endif
-            </span></td>
+        <td colspan="3"> <span>المؤسسة: </span><span> @if (is_null(session()->get("establishment"))) /@else{{ session()->get("establishment")->estab_ar_name }}  @endif </span></td>
 
     </tr>
     <tr>
-        <td> <span>رمز المؤسسة:</span> <span>
-                @if (is_null(session()->get('establishment')))
-                    /@else{{ session()->get('establishment')->estab_rawateb_user }}
-                @endif
-            </span> </td>
+        <td> <span>رمز المؤسسة:</span> <span>  @if (is_null(session()->get("establishment"))) /@else{{ session()->get("establishment")->estab_rawateb_user }} @endif   </span>  </td>
     </tr>
     <tr>
-        <td colspan="4" class="aligncenter font24">{{ $rappel->ra_megration->TITLE ?? '/' }}</td>
+        <td colspan="4" class="aligncenter font24">{{ $rappel->ra_megration->TITLE ?? '/'}}</td>
     </tr>
 </table>
 <div id="page2print" style="direction: rtl;">
@@ -161,7 +153,7 @@
                         </td>
                         <td style="width: 20%"></td>
                         <td style="text-align: left">السنة المالية:</td>
-                        <td> {{ $rappel->ra_megration->YEAR ?? 0 }}</td>
+                        <td> {{$rappel->ra_megration->YEAR ?? 0 }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -219,8 +211,7 @@
                                     </tr>
                                     <tr>
                                         <td>الجديدة</td>
-                                        <td style="text-align: center">{{ $rappel->new_rappel_rasit->CATEG ?? '/' }}
-                                        </td>
+                                        <td style="text-align: center">{{ $rappel->new_rappel_rasit->CATEG ?? '/' }} </td>
 
                                         <td style="text-align: center">
 
@@ -316,14 +307,12 @@
                                     <td style="width: 16%;">
                                         {{ number_format($value->MONTANT, 2) }}
                                     </td>
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->old_rappel_grant->MONTANT ?? 0, 2) }}
+                                    <td style="width: 16%;"> {{ number_format($value->old_rappel_grant->MONTANT ?? 0, 2) }}
                                     </td>
                                     <td style="width: 16%;">
                                         {{ number_format($value->MONTANT - ($value->old_rappel_grant->MONTANT ?? 0), 2) }}
                                     </td>
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}</td>
+                                    <td style="width: 16%;">{{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}</td>
                                 </tr>
                             @endif
                         @endforeach
@@ -339,14 +328,12 @@
                                     <td style="width: 16%;">
                                         {{ number_format($value->MONTANT, 2) }}
                                     </td>
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->old_rappel_grant->MONTANT ?? 0, 2) }}
+                                    <td style="width: 16%;"> {{ number_format($value->old_rappel_grant->MONTANT ?? 0, 2) }}
                                     </td>
                                     <td style="width: 16%;">
                                         {{ number_format($value->MONTANT - ($value->old_rappel_grant->MONTANT ?? 0), 2) }}
                                     </td>
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}</td>
+                                    <td style="width: 16%;">{{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}</td>
                                 </tr>
                             @endif
                         @endforeach
@@ -359,14 +346,12 @@
                                     <td style="width: 16%;">
                                         {{ number_format($value->MONTANT, 2) }}
                                     </td>
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->old_rappel_grant->MONTANT ?? 0, 2) }}
+                                    <td style="width: 16%;"> {{ number_format($value->old_rappel_grant->MONTANT ?? 0, 2) }}
                                     </td>
                                     <td style="width: 16%;">
                                         {{ number_format($value->MONTANT - ($value->old_rappel_grant->MONTANT ?? 0), 2) }}
                                     </td>
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}</td>
+                                    <td style="width: 16%;">{{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}</td>
                                 </tr>
                             @endif
                         @endforeach
@@ -425,8 +410,7 @@
                                         <td style="width: 16%;">
                                             {{ number_format($value->MONTANT - ($value->old_rappel_grant->MONTANT ?? 0), 2) }}
                                         </td>
-                                        <td style="width: 16%;">
-                                            {{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}
+                                        <td style="width: 16%;">{{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}
                                         </td>
                                     </tr>
                                 @endif
@@ -445,7 +429,7 @@
                 <tbody>
                     <tr>
                         <td>
-                            <div>رمز المخلف :{{ $rappel->ra_megrations->LOT ?? ' ' }}</div>
+                            <div>رمز المخلف :{{ $rappel->ra_megrations->LOT ??' ' }}</div>
 
                             <div><strong>ملاحظة هامة</strong></div>
                             تسلم نسخة للمعني وتوضع أخرى في الملف

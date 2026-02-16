@@ -1,6 +1,5 @@
 
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Director\TresorController;
 use App\Http\Controllers\Director\DirectorAtsController;
@@ -23,12 +22,11 @@ Route::group(['prefix' => 'director', 'middleware' => env("APP_ENV", "local") ==
     Route::get('/rendement/reservation/{rendement_reservations_id}/employee/list', [RendementReservationController::class, 'reservationList'])->name("director-rendements-reservation-employee-list");
     Route::post('/rendement/reservation/{rendement_reservations_id}/employee/list', [RendementReservationController::class, 'reservationList'])->name("director-rendements-reservation-employee-list");
     Route::get('/rendement/reservation/{rendement_reservations_id}/employee/{MATRI}/delete', [RendementReservationController::class, 'delete'])->name("director-rendements-reservation-employee-delete");
-
     Route::get('/rendement/{rendement_reservations_id}/get-employee/{MATRI}', [RendementReservationController::class, 'getEmployee'])->name('director-get-employee');
 
     Route::post('/rendement/reservation/employee/add', [RendementReservationController::class, 'saveNew'])->name("director-rendements-reservation-employee-add");
-
-
+     
+    
     /**
      * tresor
      */
@@ -45,7 +43,6 @@ Route::group(['prefix' => 'director', 'middleware' => env("APP_ENV", "local") ==
         ->name('director-tresor-establishment-list');
     Route::get('/tresor/sql', [TresorController::class, 'exportTresorToSQL'])->name('director-tresor-sql');
     Route::get('/tresor/excel', [TresorController::class, 'exportTresorToExcel'])->name('director-tresor-excel');
-
 
 
 
@@ -87,12 +84,12 @@ Route::group(['prefix' => 'director', 'middleware' => env("APP_ENV", "local") ==
      */
     /////////
     Route::match(['get', 'post'], '/ats/single', [DirectorAtsController::class, 'index'])
-        ->name('director-ats-single-employees');
+    ->name('director-ats-single-employees');
     Route::get('/ats/single/{MATRI}/list', [DirectorAtsController::class, 'ats_single_list'])->name('director-ats-single-list');
     Route::post('/ats/single/print', [DirectorAtsController::class, 'ats_single_print'])->name('director-ats-single-print');
 
 
-    /**
+     /**
      * mouvement
      */
     ///////ask////
@@ -107,6 +104,11 @@ Route::group(['prefix' => 'director', 'middleware' => env("APP_ENV", "local") ==
     Route::get('/mouvement/single/out', [DirectorMouvementController::class, 'out_index'])->name('director-mouvement-single-out-employees');
     //////////////cancel in and out////////////////////////////////
     Route::get('/mouvement/single/{id}/cancel', [DirectorMouvementController::class, 'destroy'])->name('director-mouvement-single-cancel');
+
+
+
+
+
 });
 
 Route::post('director/getway', [DirectorGetwayController::class, 'login'])->name('director-getway-login')->withoutMiddleware([VerifyCsrfToken::class]);

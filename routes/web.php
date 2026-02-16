@@ -95,14 +95,17 @@ Route::group(['prefix' => '', 'middleware' => env("APP_ENV", "local") == "local"
         ->name('salary-global-view-post');
     Route::post('/salary/global/print', [SalaryController::class, 'salary_global_print'])->name('salary-global-print');
     Route::post('/salary/single/global/print', [SalaryController::class, 'salary_single_global_print'])->name('salary-single-global-print');
-    ///////// global
-    Route::get('/rappel/global/list', [RappelController::class, 'rappel_global_megration_list'])->name('rappel-global-megration-list');
+    ///////// rappel
+     //global
+    Route::get('/rappel/global/list', [RappelController::class, 'rappel_global_list'])->name('rappel-global-list');
     Route::post('/rappel/global/print', [RappelController::class, 'rappel_global_print'])->name('rappel-global-print');
-
+   //single
     Route::match(['get', 'post'], '/rappel/single', [RappelController::class, 'index'])
         ->name('rappel-single-employees');
     Route::get('/rappel/{MATRI}/list', [RappelController::class, 'rappel_list'])->name('rappel-single-list');
     Route::post('/rappel/print', [RappelController::class, 'rappel_print'])->name('rappel-single-print');
+   
+
     /**
      * rendement
      */

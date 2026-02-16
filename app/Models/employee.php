@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\establishment;
+use App\Models\establishemnet;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
