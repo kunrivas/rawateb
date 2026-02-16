@@ -203,7 +203,7 @@ class RappelController extends Controller
         $rappel_megrations = $rappel_megrations_query
             ->where("rappel_megrations.ADM", $request->ADM)
             ->where("rappel_megrations.ID_MEGRATION_RA", $current_megration->ID_MEGRATION_RA)
-            // ->with(['new_rappel_grants.rappel_grant_due', 'new_rappel_rasit'])
+         /*    ->with(['new_rappel_grants.rappel_grant_due', 'new_rappel_rasit']) */
             ->select(
                 'rappel_megrations.*',
                 'employees.NOMA',
@@ -217,31 +217,36 @@ class RappelController extends Controller
         $view_data = [];
 
         foreach ($rappel_megrations as $rappel) {
-            $item = [];
-            $item["matri"] = $rappel->MATRI;
-            $item["AFFECT"] = $rappel->AFFECT;
-            $item["fullName"] = $rappel->NOMA . ' ' . $rappel->PRENOMA;
-            $item["SITFAM"] = $rappel->new_rappel_rasit->SITFAM ?? '/';
-            $item["CATEG"] = $rappel->new_rappel_rasit->CATEG ?? '/';
-            $item["ECH"] = $rappel->new_rappel_rasit->ECH ?? '/';
-            $item["BASENBR"] = $rappel->rappel_grant_due->BASENBR ?? 0;
-            $item["MONTANT"] = $rappel->rappel_grant_due->MONTANT ?? 0;
-            /*  // Extract Due values from new_rappel_grants -> rappel_grant_due
-            $gross_due_obj = $rappel->new_rappel_grants->where('IND', '610')->first();
-            $item["gross_due"] = ($gross_due_obj && $gross_due_obj->rappel_grant_due) ? $gross_due_obj->rappel_grant_due->BASENBR : 0;
-            
-            $ss_due_obj = $rappel->new_rappel_grants->where('IND', '980')->first();
-            $item["ss_due"] = ($ss_due_obj && $ss_due_obj->rappel_grant_due) ? $ss_due_obj->rappel_grant_due->MONTANT : 0;
-            
-            $tax_due_obj = $rappel->new_rappel_grants->where('IND', '660')->first();
-            $item["tax_due"] = ($tax_due_obj && $tax_due_obj->rappel_grant_due) ? $tax_due_obj->rappel_grant_due->MONTANT : 0;
-            
-            $net_due_obj = $rappel->new_rappel_grants->where('IND', '999')->first();
-            $item["net_due"] = ($net_due_obj && $net_due_obj->rappel_grant_due) ? $net_due_obj->rappel_grant_due->MONTANT : 0; */
+            $item = [
+                "matri" => $rappel->MATRI,
+                "AFFECT" => $rappel->AFFECT,
+                "fullName" => $rappel->NOMA . ' ' . $rappel->PRENOMA,
+                "SITFAM" => $rappel->new_rappel_rasit->SITFAM ?? '/',
+                "CATEG" => $rappel->new_rappel_rasit->CATEG ?? '/',
+                "ECH" => $rappel->new_rappel_rasit->ECH ?? '/',
+                "gross_due" => 0,
+                "ss_due" => 0,
+                "tax_due" => 0,
+                "net_due" => 0,
+            ];
 
-            array_push($view_data, $item);
-        }
-dd($rappel_megrations);
+            foreach ($rappel->new_rappel_grants as $value) {
+                $ind = trim((string) $value->IND);
+
+                if ($ind === '610') {
+                    $item["gross_due"] = $value->rappel_grant_due->BASENBR ?? 0;
+                } elseif ($ind === '980') {
+                    $item["ss_due"] = $value->rappel_grant_due->MONTANT ?? 0;
+                } elseif ($ind === '660') {
+                    $item["tax_due"] = $value->rappel_grant_due->MONTANT ?? 0;
+                } elseif ($ind === '999') {
+                    $item["net_due"] = $value->rappel_grant_due->MONTANT ?? 0;
+                }
+            }
+            
+            $view_data[] = $item;
+        } //dd($view_data); 
+    
         $mpdf = new CMPDF();
         $mpdf->initialize([
             'orientation' => 'L',

@@ -153,10 +153,10 @@
                                 <div>{{ $value['CATEG'] }}</div>
                                 <div>{{ $value['ECH'] }}</div>
                             </td>
-                          {{--   <td> {{ number_format($value['gross_due'], 2) }}</td>
+                            <td> {{ number_format($value['gross_due'], 2) }}</td>
                             <td> {{ number_format($value['ss_due'], 2) }}</td>
                             <td> {{ number_format($value['tax_due'], 2) }}</td>
-                            <td> {{ number_format($value['net_due'], 2) }}</td> --}}
+                            <td> {{ number_format($value['net_due'], 2) }}</td> 
                         </tr>
                     @endforeach
                 @else
