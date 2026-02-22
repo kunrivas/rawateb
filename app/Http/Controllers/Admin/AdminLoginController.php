@@ -43,6 +43,7 @@ class AdminLoginController extends Controller
             return redirect()->back()->withErrors([' ليس لديك الصلاحية للوصول إلى هاته الصفحة لقد تم تسديل بياناتك لمراجعتها']);
         }
         Auth::login($user);
+        $request->session()->forget('admin_pin_verified');
         //dd($user->roles);
 
         return redirect()->route("admin-home");
@@ -54,8 +55,6 @@ class AdminLoginController extends Controller
         return redirect()->route('admin-login');
     }
 }
-
-
 
 
 

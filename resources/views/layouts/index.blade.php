@@ -13,29 +13,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="/admin3/plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ asset('admin3/plugins/font-awesome/css/font-awesome.min.css') }}">
     <!-- Ionicons -->
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <!-- Theme style -->
-    <link rel="stylesheet" href="/admin3/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="{{ asset('admin3/dist/css/adminlte.min.css') }}">
     <!-- iCheck -->
-    <link rel="stylesheet" href="/admin3/plugins/iCheck/flat/blue.css">
+    <link rel="stylesheet" href="{{ asset('admin3/plugins/iCheck/flat/blue.css') }}">
     <!-- Morris chart -->
-    <link rel="stylesheet" href="/admin3/plugins/morris/morris.css">
+    <link rel="stylesheet" href="{{ asset('admin3/plugins/morris/morris.css') }}">
     <!-- jvectormap -->
-    <link rel="stylesheet" href="/admin3/plugins/jvectormap/jquery-jvectormap-1.2.2.css">
+    <link rel="stylesheet" href="{{ asset('admin3/plugins/jvectormap/jquery-jvectormap-1.2.2.css') }}">
     <!-- Date Picker -->
-    <link rel="stylesheet" href="/admin3/plugins/datepicker/datepicker3.css">
+    <link rel="stylesheet" href="{{ asset('admin3/plugins/datepicker/datepicker3.css') }}">
     <!-- Daterange picker -->
-    <link rel="stylesheet" href="/admin3/plugins/daterangepicker/daterangepicker-bs3.css">
+    <link rel="stylesheet" href="{{ asset('admin3/plugins/daterangepicker/daterangepicker-bs3.css') }}">
     <!-- bootstrap wysihtml5 - text editor -->
-    <link rel="stylesheet" href="/admin3/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+    <link rel="stylesheet" href="{{ asset('admin3/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
     <!-- Google Font: Source Sans Pro -->
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
     <!-- bootstrap rtl -->
-    <link rel="stylesheet" href="/admin3/dist/css/bootstrap-rtl.min.css">
+    <link rel="stylesheet" href="{{ asset('admin3/dist/css/bootstrap-rtl.min.css') }}">
     <!-- template rtl version -->
-    <link rel="stylesheet" href="/admin3/dist/css/custom-style.css">
+    <link rel="stylesheet" href="{{ asset('admin3/dist/css/custom-style.css') }}">
     @yield('css')
     <style>
         .news-banner {
@@ -209,7 +209,7 @@
                             <a href="#" class="dropdown-item">
                                 <!-- Message Start -->
                                 {{-- <div class="media">
-                                <img src="/admin3/dist/img/user1-128x128.jpg" alt="User Avatar"
+                                <img src="{{ asset('admin3/dist/img/user1-128x128.jpg') }}" alt="User Avatar"
                                     class="img-size-50 ml-3 img-circle">
                                 <div class="media-body">
                                     <h3 class="dropdown-item-title">
@@ -226,7 +226,7 @@
                             <a href="#" class="dropdown-item">
                                 <!-- Message Start -->
                                 {{-- <div class="media">
-                                <img src="/admin3/dist/img/user8-128x128.jpg" alt="User Avatar"
+                                <img src="{{ asset('admin3/dist/img/user8-128x128.jpg') }}" alt="User Avatar"
                                     class="img-size-50 img-circle ml-3">
                                 <div class="media-body">
                                     <h3 class="dropdown-item-title">
@@ -243,7 +243,7 @@
                             <a href="#" class="dropdown-item">
                                 <!-- Message Start -->
                                 {{-- <div class="media">
-                                <img src="/admin3/dist/img/user8-128x128.jpg" alt="User Avatar"
+                                <img src="{{ asset('admin3/dist/img/user8-128x128.jpg') }}" alt="User Avatar"
                                     class="img-size-50 img-circle ml-3">
                                 <div class="media-body">
                                     <h3 class="dropdown-item-title">
@@ -311,7 +311,7 @@
                         <!-- Sidebar user panel (optional) -->
                         <!--  <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                         <div class="image">
-                            <img src="/admin3/dist/img/user1-128x128.jpg" class="img-circle elevation-2"
+                            <img src="{{ asset('admin3/dist/img/user1-128x128.jpg') }}" class="img-circle elevation-2"
                                 alt="User Image">
                         </div>
 
@@ -700,7 +700,7 @@
         <!-- ./wrapper -->
 
         <!-- jQuery -->
-        <script src="/admin3/plugins/jquery/jquery.min.js"></script>
+        <script src="{{ asset('admin3/plugins/jquery/jquery.min.js') }}"></script>
         <!-- jQuery UI 1.11.4 -->
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
         <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
@@ -708,30 +708,30 @@
             $.widget.bridge('uibutton', $.ui.button)
         </script>
         <!-- Bootstrap 4 -->
-        <script src="/admin3/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="{{ asset('admin3/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
         <!-- Morris.js charts -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-        <script src="/admin3/plugins/morris/morris.min.js"></script>
+        <script src="{{ asset('admin3/plugins/morris/morris.min.js') }}"></script>
         <!-- Sparkline -->
-        <script src="/admin3/plugins/sparkline/jquery.sparkline.min.js"></script>
+        <script src="{{ asset('admin3/plugins/sparkline/jquery.sparkline.min.js') }}"></script>
         <!-- jvectormap -->
-        <script src="/admin3/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
-        <script src="/admin3/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+        <script src="{{ asset('admin3/plugins/jvectormap/jquery-jvectormap-1.2.2.min.js') }}"></script>
+        <script src="{{ asset('admin3/plugins/jvectormap/jquery-jvectormap-world-mill-en.js') }}"></script>
         <!-- jQuery Knob Chart -->
-        <script src="/admin3/plugins/knob/jquery.knob.js"></script>
+        <script src="{{ asset('admin3/plugins/knob/jquery.knob.js') }}"></script>
         <!-- daterangepicker -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
-        <script src="/admin3/plugins/daterangepicker/daterangepicker.js"></script>
+        <script src="{{ asset('admin3/plugins/daterangepicker/daterangepicker.js') }}"></script>
         <!-- datepicker -->
-        <script src="/admin3/plugins/datepicker/bootstrap-datepicker.js"></script>
+        <script src="{{ asset('admin3/plugins/datepicker/bootstrap-datepicker.js') }}"></script>
         <!-- Bootstrap WYSIHTML5 -->
-        <script src="/admin3/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+        <script src="{{ asset('admin3/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js') }}"></script>
         <!-- Slimscroll -->
-        <script src="/admin3/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+        <script src="{{ asset('admin3/plugins/slimScroll/jquery.slimscroll.min.js') }}"></script>
         <!-- FastClick -->
-        <script src="/admin3/plugins/fastclick/fastclick.js"></script>
+        <script src="{{ asset('admin3/plugins/fastclick/fastclick.js') }}"></script>
         <!-- AdminLTE App -->
-        <script src="/admin3/dist/js/adminlte.js"></script>
+        <script src="{{ asset('admin3/dist/js/adminlte.js') }}"></script>
 
         <script></script>
         @yield('js')

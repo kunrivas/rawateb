@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
           // 🟢 تسجيل الـ middleware العام أو الخاص بالروتات
     $middleware->alias([
         'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'absence.pin' => \App\Http\Middleware\EnsureAbsencePinVerified::class,
+        'admin.pin' => \App\Http\Middleware\EnsureAdminPinVerified::class,
     ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin PIN Setup</title>
+    <style>
+        body { background: #f8fafc; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; width: 300px; }
+        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 4px; font-size: 20px; text-align: center; letter-spacing: 10px; }
+        button { background: #2563eb; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        .error { color: #dc2626; font-size: 14px; margin-bottom: 10px; }
+        .alert-success {
+            color: #166534;
+            background-color: #d1fae5;
+            border: 1px solid #a7f3d0;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h3>Admin PIN Setup</h3>
+        <p>Please set your 4-digit PIN to continue.</p>
+
+        <div class="alert-success">
+            <b>يرجى تعيين أربعة أرقام خاصة بك لتأمين حسابك</b>
+            <br>
+            <b style="color:#dc2626;">قم بحفظ هذه الأرقام لاستعمالها في الدخول دائمًا</b>
+        </div>
+
+        @if ($errors->any())
+            <div class="error">{{ $errors->first() }}</div>
+        @endif
+
+        <form action="{{ route('admin.pin.create.store') }}" method="POST">
+            @csrf
+            <input type="password" name="pin" maxlength="4" required autofocus autocomplete="off">
+            <button type="submit">Save PIN</button>
+        </form>
+        <br>
+        <a href="{{ route('admin-logout') }}"
+           onclick="event.preventDefault(); document.getElementById('admin-logout-form').submit();">Logout</a>
+        <form id="admin-logout-form" action="{{ route('admin-logout') }}" method="POST" style="display:none;">
+            @csrf
+        </form>
+    </div>
+</body>
+</html>

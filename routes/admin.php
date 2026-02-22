@@ -11,9 +11,16 @@ use App\Http\Controllers\Admin\TresorController;
 the middleware has test of env local doesnt work
  it work only on production env */
 
+Route::middleware(['web', 'auth', 'role:manager|printer'])->group(function () {
+    Route::get('manager/pin/create', [App\Http\Controllers\Admin\SecurityPinController::class, 'createPin'])->name('admin.pin.create');
+    Route::post('manager/pin/create', [App\Http\Controllers\Admin\SecurityPinController::class, 'store'])->name('admin.pin.create.store');
+    Route::get('manager/pin/verify', [App\Http\Controllers\Admin\SecurityPinController::class, 'showVerifyForm'])->name('admin.pin.verify');
+    Route::post('manager/pin/verify', [App\Http\Controllers\Admin\SecurityPinController::class, 'check'])->name('admin.pin.check');
+});
+
 
 Route::group([
-    'middleware' => ['web', 'auth', 'role:manager|printer']
+    'middleware' => ['web', 'auth', 'role:manager|printer', 'admin.pin']
 ], function () {
 
     /**
@@ -370,6 +377,7 @@ Route::post('manager/login', [App\Http\Controllers\Admin\AdminLoginController::c
 //this for logout
 Route::post('manager/logout', function () {
     Auth::logout();
+    request()->session()->forget('admin_pin_verified');
     request()->session()->invalidate();
     request()->session()->regenerateToken();
     return redirect('manager/login');
