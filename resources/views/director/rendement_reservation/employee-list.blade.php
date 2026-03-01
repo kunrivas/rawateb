@@ -89,7 +89,8 @@
                         style="background: transparent; height: 34px; border-right: 1px solid #ced4da;">
                         <i class="fa fa-filter"></i>
                     </button>
-                    <div class="dropdown-menu dropdown-menu-right" style="width: 300px;padding: 10px; border: 1px solid gray;">
+                    <div class="dropdown-menu dropdown-menu-right"
+                        style="width: 300px;padding: 10px; border: 1px solid gray;">
                         <div class="row">
                             <div class="col" style="border-right: 0.5px solid #dfd9d9;padding-right: 10px;">
                                 <h5 style="text-align: right">الادارة</h5>
@@ -101,7 +102,8 @@
                                                     name="adms[{{ $adm->ADM }}]"
                                                     @if (in_array($adm->ADM, $select_adms)) checked @endif
                                                     id="flexCheckIndeterminate{{ $adm->ADM }}">
-                                                <label class="form-check-label" for="flexCheckIndeterminate{{ $adm->ADM }}">
+                                                <label class="form-check-label"
+                                                    for="flexCheckIndeterminate{{ $adm->ADM }}">
                                                     {{ $adm->LIBTABA }}
                                                 </label>
                                             </div>
@@ -117,11 +119,14 @@
         </div>
     </form>
 
-    @if ($rendementReservation->status && $rendement_reservations_statistic->status == 0)
+    {{--  @if ($rendementReservation->status && $rendement_reservations_statistic->status == 0) --}}
+    @if ($rendementReservation->status)
         <div class="d-flex flex-row-reverse bd-highlight">
-            <button class="btn text-white btn-success show-info-btn ml-2" data-toggle="modal" data-target="#infoModal">إضافة موظف</button>
+            <button class="btn text-white btn-success show-info-btn ml-2" data-toggle="modal" data-target="#infoModal">إضافة
+                موظف</button>
         </div>
     @endif
+    {{--  @endif --}}
 
     <div class="row">
         <div class="col">
@@ -158,7 +163,8 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if ($rendementReservation->status && $rendement_reservations_statistic->status == 0)
+                                    {{--  @if ($rendementReservation->status && $rendement_reservations_statistic->status == 0) --}}
+                                    @if ($rendementReservation->status)
                                         <a class="btn btn-danger btn-sm"
                                             href="{{ route('director-rendements-reservation-employee-delete', ['rendement_reservations_id' => $rendementReservation->id, 'MATRI' => $value->MATRI]) }}">حذف</a>
                                     @endif
@@ -213,7 +219,8 @@
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <p class="mr-3"><strong>الإسم الكامل : </strong> <span id="NOMA"></span> <span id="PRENOMA"></span></p>
+                                <p class="mr-3"><strong>الإسم الكامل : </strong> <span id="NOMA"></span> <span
+                                        id="PRENOMA"></span></p>
                             </div>
                             <div class="col">
                                 <p class="mr-3"><strong>الإدارة : </strong> <span id="ADM"></span></p>
@@ -263,7 +270,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-sm m-1 btn-primary" style="display: none;" id="addBtn">حجز النقطة</button>
+                    <button type="button" class="btn btn-sm m-1 btn-primary" style="display: none;" id="addBtn">حجز
+                        النقطة</button>
                     <button type="button" class="btn btn-sm m-1 btn-secondary" data-dismiss="modal">إغلاق</button>
                 </div>
             </div>
@@ -273,98 +281,99 @@
 @endsection
 
 @section('js')
-<script>
-    let maxpoint = 40;
-    $(document).ready(function() {
+    <script>
+        let maxpoint = 40;
+        $(document).ready(function() {
 
-        function fetchEmployeeData(MATRI) {
-            $("#MATRI_display, #NOMA, #PRENOMA, #ADM, #SITFAM, #CATEG, #ECH").text("");
-            $("#em-info-error").hide();
-            $("#em-info").hide();
-            $("#addBtn").hide();
+            function fetchEmployeeData(MATRI) {
+                $("#MATRI_display, #NOMA, #PRENOMA, #ADM, #SITFAM, #CATEG, #ECH").text("");
+                $("#em-info-error").hide();
+                $("#em-info").hide();
+                $("#addBtn").hide();
 
-            $.ajax({
-                url: `/director/rendement/{{ $rendementReservation->id }}/get-employee/${MATRI}`,
-                type: 'GET',
-                success: function(data) {
-                    if (data) {
-                        $("#em-info-error").hide();
-                        $("#em-info").show();
-                        $("#MATRI_display").text(data.MATRI);
-                        $("#NOMA").text(data.NOMA);
-                        $("#PRENOMA").text(data.PRENOMA);
-                        $("#ADM").text(data.ADM);
-                        $("#FONCTION").text(data.fonction ? data.fonction.LIBTABA : '');
-                        $("#SITFAM").text(data.SITFAM);
-                        $("#CATEG").text(data.CATEG);
-                        $("#ECH").text(data.ECH);
-                        $("#abs").text(data.abs);
-                        if (data.fonction) {
-                            $("#maxpoint").val(data.fonction.TAUXPR);
-                            maxpoint = parseInt(data.fonction.TAUXPR);
+                $.ajax({
+                    url: `/director/rendement/{{ $rendementReservation->id }}/get-employee/${MATRI}`,
+                    type: 'GET',
+                    success: function(data) {
+                        if (data) {
+                            $("#em-info-error").hide();
+                            $("#em-info").show();
+                            $("#MATRI_display").text(data.MATRI);
+                            $("#NOMA").text(data.NOMA);
+                            $("#PRENOMA").text(data.PRENOMA);
+                            $("#ADM").text(data.ADM);
+                            $("#FONCTION").text(data.fonction ? data.fonction.LIBTABA : '');
+                            $("#SITFAM").text(data.SITFAM);
+                            $("#CATEG").text(data.CATEG);
+                            $("#ECH").text(data.ECH);
+                            $("#abs").text(data.abs);
+                            if (data.fonction) {
+                                $("#maxpoint").val(data.fonction.TAUXPR);
+                                maxpoint = parseInt(data.fonction.TAUXPR);
+                            }
+                            $("#estab").text(data.establishment ? data.establishment.estab_ar_name :
+                                "لا ينتمي لاي مؤسسة");
+                            $("#addBtn").show();
                         }
-                        $("#estab").text(data.establishment ? data.establishment.estab_ar_name : "لا ينتمي لاي مؤسسة");
-                        $("#addBtn").show();
+                    },
+                    error: function() {
+                        $("#em-info-error").show();
+                        $("#em-info").hide();
+                        $("#addBtn").hide();
                     }
-                },
-                error: function() {
-                    $("#em-info-error").show();
-                    $("#em-info").hide();
-                    $("#addBtn").hide();
-                }
-            });
-        }
-
-        $("#searchEmp").on("click", function() {
-            var MATRI = $("#MATRI").val().trim();
-            if (MATRI) fetchEmployeeData(MATRI);
-        });
-
-        $("#addBtn").click(function(e) {
-            e.preventDefault();
-            $("#addBtn").hide();
-            var MATRI = $("#MATRI_display").text();
-            var areservationId = {{ $rendementReservation->id }};
-            var point = parseInt($("#point").val());
-            if (point && (point > maxpoint || point < 0)) {
-                alert("النقطة لا يجب ان تكون اعلى من " + maxpoint + " أو اقل من 0");
-                $("#addBtn").show();
-                return;
+                });
             }
 
-            var formData = new FormData();
-            formData.append("_token", $('meta[name="csrf-token"]').attr("content"));
-            formData.append("MATRI", MATRI);
-            formData.append("rendement_reservations_id", areservationId);
-            formData.append("point", point);
-
-            $.ajax({
-                url: "/director/rendement/reservation/employee/add",
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response.status === 0) {
-                        alert(response.message);
-                        $("#addBtn").show();
-                    } else if (response.status === 1) {
-                        alert("تم إضافة بنجاح");
-                        $("#infoModal").modal('hide');
-                        location.reload();
-                    }
-                },
-                error: function() {
-                    alert("هناك خطأ");
-                }
+            $("#searchEmp").on("click", function() {
+                var MATRI = $("#MATRI").val().trim();
+                if (MATRI) fetchEmployeeData(MATRI);
             });
-        });
 
-        window.onClickType = function(type) {
-            $("[id^='btn-type-']").removeClass('btn-success').addClass('btn-light');
-            $(`#btn-type-${type}`).removeClass('btn-light').addClass('btn-success');
-            atype = type;
-        };
-    });
-</script>
+            $("#addBtn").click(function(e) {
+                e.preventDefault();
+                $("#addBtn").hide();
+                var MATRI = $("#MATRI_display").text();
+                var areservationId = {{ $rendementReservation->id }};
+                var point = parseInt($("#point").val());
+                if (point && (point > maxpoint || point < 0)) {
+                    alert("النقطة لا يجب ان تكون اعلى من " + maxpoint + " أو اقل من 0");
+                    $("#addBtn").show();
+                    return;
+                }
+
+                var formData = new FormData();
+                formData.append("_token", $('meta[name="csrf-token"]').attr("content"));
+                formData.append("MATRI", MATRI);
+                formData.append("rendement_reservations_id", areservationId);
+                formData.append("point", point);
+
+                $.ajax({
+                    url: "/director/rendement/reservation/employee/add",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.status === 0) {
+                            alert(response.message);
+                            $("#addBtn").show();
+                        } else if (response.status === 1) {
+                            alert("تم إضافة بنجاح");
+                            $("#infoModal").modal('hide');
+                            location.reload();
+                        }
+                    },
+                    error: function() {
+                        alert("هناك خطأ");
+                    }
+                });
+            });
+
+            window.onClickType = function(type) {
+                $("[id^='btn-type-']").removeClass('btn-success').addClass('btn-light');
+                $(`#btn-type-${type}`).removeClass('btn-light').addClass('btn-success');
+                atype = type;
+            };
+        });
+    </script>
 @endsection

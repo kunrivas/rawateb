@@ -185,46 +185,82 @@ class RendementReservationController extends Controller
 
 
     public function saveNew(Request $request)
-    {    try {
-        // your code here...
-    
+    {
+        try {
+            // your code here...
+
+            if (env("APP_ENV", "local") == "local")
+                $establishment = establishment::where("estab_rawateb_user", "390904")->first();
+            else
+                $establishment = session()->get("establishment");
+            $rendementReservation = RendementReservation::where("id", $request->rendement_reservations_id)->first();
+            if (!$rendementReservation) {
+                return ["status" => 0, "message" => "الحجز غير موجود"];
+            }
+            $rendement_reservations_employee =  RendementReservationEmployee::with(["employee", "establishment"])
+                ->where("MATRI",  $request->MATRI)
+                ->where("estab_mail_code",  $establishment->estab_mail_code)
+                ->where("rendement_reservations_id", $request->rendement_reservations_id)->first();
+            if ($rendement_reservations_employee) {
+                $message = " تم حجز هذا الموضف مسبقا في مؤسسة :  " . $rendement_reservations_employee->establishment->estab_ar_name ?? "";
+                return ["status" => 0, "message" => $message];
+            }
+
+            $employee =  employee::where("MATRI", $request->MATRI)->first();
+            if (!$employee) {
+                return ["status" => 0, "message" => "الموظف غير موجود"];
+            }
+
+            if ($employee->fonction) {
+                if ($request->point > $employee->fonction->TAUXPR) {
+                    $message = "نقطة الموظف "  . $employee->PRENOMA . " " . $employee->NOMA . " (" . $request->MATRI .  ") ليست صحيحة";
+                    return ["status" => 0, "message" => $message];
+                }
+            }
+
+            $r_r_emp = new RendementReservationEmployee();
+            $r_r_emp->MATRI = $employee->MATRI;
+            $r_r_emp->abs = $rendementReservation->absTotal - $employee->workCount($rendementReservation);
+            $r_r_emp->point = $request->point;
+            $r_r_emp->affect = $employee->AFFECT;
+            $r_r_emp->estab_mail_code = $establishment->estab_mail_code;
+            $r_r_emp->rendement_reservations_id = $rendementReservation->id;
+            $r_r_emp->save();
+            // remplir table statistic by count table RendementReservationEmployee with conditions
+            $statistic = RendementReservationsStatistic::where("establishment_id", $establishment->id)->where("rendement_reservations_id", $request->rendement_reservations_id)->first();
+            //where not null point
+            $statistic->reserved = RendementReservationEmployee::where("estab_mail_code", $establishment->estab_mail_code)->where("rendement_reservations_id", $request->rendement_reservations_id)->whereNotNull("point")->count();
+            //where point = 0
+            $statistic->ziroPoint = RendementReservationEmployee::where("estab_mail_code", $establishment->estab_mail_code)->where("rendement_reservations_id", $request->rendement_reservations_id)->whereNotNull("point")->where("point", 0)->count();
+            $statistic->total = RendementReservationEmployee::where("estab_mail_code", $establishment->estab_mail_code)->where("rendement_reservations_id", $request->rendement_reservations_id)->count();
+            $statistic->save();
+            return ["status" => 1];
+        } catch (\Throwable $e) {
+            return response()->json([
+                "status" => 0,
+                "message" => $e->getMessage()
+            ]);
+        }
+    }
+
+
+
+
+    public function delete(Request $request)
+    {   //for statistics
         if (env("APP_ENV", "local") == "local")
             $establishment = establishment::where("estab_rawateb_user", "390904")->first();
         else
             $establishment = session()->get("establishment");
-        $rendementReservation = RendementReservation::where("id", $request->rendement_reservations_id)->first();
-        if (!$rendementReservation) {
-            return ["sitpai" => 0, "message" => "الحجز غير موجود"];
-        }
-        $rendement_reservations_employee =  RendementReservationEmployee::with(["employee", "establishment"])
-            ->where("MATRI",  $request->MATRI)
-            ->where("estab_mail_code",  $establishment->estab_mail_code)
-            ->where("rendement_reservations_id", $request->rendement_reservations_id)->first();
-        if ($rendement_reservations_employee) {
-            $message = " تم حجز هذا الموضف مسبقا في مؤسسة :  " . $rendement_reservations_employee->establishment->estab_ar_name ?? "";
-            return ["sitpai" => 0, "message" => $message];
-        }
 
-        $employee =  employee::where("MATRI", $request->MATRI)->first();
-        if (!$employee) {
-            return ["sitpai" => 0, "message" => "الموظف غير موجود"];
-        }
+        //the delete
+        $rendement_reservations_id = $request->rendement_reservations_id;
+        $MATRI = $request->MATRI;
+        RendementReservationEmployee::where("MATRI", $MATRI)
+            ->where("rendement_reservations_id", $rendement_reservations_id)
+            ->delete();
 
-        if ($employee->fonction) {
-            if ($request->point > $employee->fonction->TAUXPR) {
-                $message = "نقطة الموظف "  . $employee->PRENOMA . " " . $employee->NOMA . " (" . $request->MATRI .  ") ليست صحيحة";
-                return ["sitpai" => 0, "message" => $message];
-            }
-        }
-
-        $r_r_emp = new RendementReservationEmployee();
-        $r_r_emp->MATRI = $employee->MATRI;
-        $r_r_emp->abs = $rendementReservation->absTotal - $employee->workCount($rendementReservation);
-        $r_r_emp->point = $request->point;
-        $r_r_emp->affect = $employee->AFFECT;
-        $r_r_emp->estab_mail_code = $establishment->estab_mail_code;
-        $r_r_emp->rendement_reservations_id = $rendementReservation->id;
-        $r_r_emp->save();
+        //for statistics
         // remplir table statistic by count table RendementReservationEmployee with conditions
         $statistic = RendementReservationsStatistic::where("establishment_id", $establishment->id)->where("rendement_reservations_id", $request->rendement_reservations_id)->first();
         //where not null point
@@ -233,29 +269,12 @@ class RendementReservationController extends Controller
         $statistic->ziroPoint = RendementReservationEmployee::where("estab_mail_code", $establishment->estab_mail_code)->where("rendement_reservations_id", $request->rendement_reservations_id)->whereNotNull("point")->where("point", 0)->count();
         $statistic->total = RendementReservationEmployee::where("estab_mail_code", $establishment->estab_mail_code)->where("rendement_reservations_id", $request->rendement_reservations_id)->count();
         $statistic->save();
-        return ["sitpai" => 1];
-        } catch (\Throwable $e) {
-        return response()->json([
-            "sitpai" => 0,
-            "message" => $e->getMessage()
-        ]);
-    }
-    }
-
-
-
-
-    public function delete(Request $request)
-    {
-        $rendement_reservations_id = $request->rendement_reservations_id;
-        $MATRI = $request->MATRI;
-        RendementReservationEmployee::where("MATRI", $MATRI)
-            ->where("rendement_reservations_id", $rendement_reservations_id)
-            ->delete();
-
 
         return redirect()->back();
     }
+
+
+    
     public function getEmployee($rendement_reservations_id, $MATRI)
     {
 

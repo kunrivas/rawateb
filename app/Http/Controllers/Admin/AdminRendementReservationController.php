@@ -195,7 +195,7 @@ class AdminRendementReservationController extends Controller
    to togle  the status (open =0 /close) of rendemenReservation
    */
     public function status(Request $request)
-    {
+    {   //dd($request);
         $rendemenReservation =  RendementReservation::find($request->id);
         //  dd(intval($request->status));
         $rendemenReservation->status = intval($request->status);

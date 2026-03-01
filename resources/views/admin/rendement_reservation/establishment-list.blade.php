@@ -83,7 +83,7 @@
 
                     <div class="col-8" style="position: relative">
                         {{--  input search --}}
-                        <input type="text" class="form-control" id="search" name="search" placeholder="موظف"
+                        <input type="text" class="form-control" id="search" name="search" placeholder="مؤسسة"
                             value="{{ $search }}">
                         {{-- dropdown filter --}}
 
