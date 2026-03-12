@@ -98,6 +98,10 @@
                 href="{{ route('admin-rendements-in-establishments', $rendementReservation->id) }}">قائمة المؤسسات التي لم
                 تحجز
             </a>
+             <a class="btn btn-danger btn-sm text-white mx-2 " style="    height: fit-content;            "
+                href="{{ route('admin-rendements-not-reserved', $rendementReservation->id) }}">قائمة الموظفين التي لم
+                تحجز
+            </a>
         </div>
 
     </div>

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 
 
 use App\Http\Controllers\Controller;
-
+use App\Models\employee;
 
 use App\Models\adm;
 use App\Models\establishment;
@@ -151,6 +151,67 @@ class AdminRendementReservationController extends Controller
         return   view("admin.rendement_reservation.in-establishment-list", ["rendement_reservations_id" => $rendement_reservations_id, "establishments" => $establishments, "search" => $search]);
     }
 
+    public function emp_not_reserved(Request $request, $rendement_reservations_id)
+    {
+        // 1️⃣ جلب حجز المردودية
+        $rendementReservation = RendementReservation::findOrFail($rendement_reservations_id);
+
+        // 2️⃣ البحث إذا موجود (اختياري)
+        $search = $request->input('search');
+
+        // 3️⃣ جهز قائمة الموظفين الذين لديهم عمل > 0
+        $workEmployees = DB::table('emp_megrations')
+            ->join('megrations', 'megrations.ID_MEGRATION', '=', 'emp_megrations.ID_MEGRATION')
+            ->select('emp_megrations.MATRI')
+            ->where('megrations.YEAR', $rendementReservation->year)
+            ->whereIn('megrations.MONTH', $rendementReservation->getMonths())
+            ->groupBy('emp_megrations.MATRI')
+            ->havingRaw('SUM(emp_megrations.NBRTRAV) > 0');
+
+        // 4️⃣ جلب الموظفين غير المسجلين بعد في هذا الحجز
+        $employees = employee::query()
+            ->with(['establishment', 'fonction'])
+            ->join('establishments', 'establishments.estab_rawateb_user', '=', 'employees.AFFECT')
+            ->leftJoin('fonctions', 'fonctions.CODEFONC', '=', 'employees.CODEFONC') // إضافة جدول الوظائف
+            ->select(
+                'employees.MATRI',
+                'employees.NOMA',
+                'employees.PRENOMA',
+                'employees.ADM',
+                'employees.AFFECT',
+                'establishments.estab_ar_name',
+                'fonctions.LIBTABA as fonction' // إضافة عمود اسم الوظيفة
+            )
+
+            ->whereIn('employees.MATRI', $workEmployees) // فقط الموظفين الذين لديهم عمل
+            ->whereNotExists(function ($query) use ($rendement_reservations_id) {
+                $query->select(DB::raw(1))
+                    ->from('rendement_reservation_employees as rre')
+                    ->whereColumn('rre.MATRI', 'employees.MATRI')
+                    ->where('rre.rendement_reservations_id', $rendement_reservations_id);
+            })
+            ->orderBy('employees.ADM')
+            ->orderBy('establishments.estab_rawateb_user');
+
+        // 5️⃣ إضافة فلترة بحث إذا أردت
+      /*   if (!empty($search)) {
+            $employees->where(function ($q) use ($search) {
+                $q->where('employees.NOM', 'like', "%$search%")
+                    ->orWhere('employees.PRENOM', 'like', "%$search%")
+                    ->orWhere('employees.MATRI', 'like', "%$search%");
+            });
+        } */
+
+        // 6️⃣ جلب كل النتائج (بدون Pagination)
+        $employees = $employees->get();
+
+        // 7️⃣ إرسال النتائج للواجهة
+        return view('admin.rendement_reservation.employee-list-not', [
+            'employees' => $employees,
+            'rendementReservation' => $rendementReservation,
+            'search' => $search,
+        ]);
+    }
 
     /*
     function reservationEstablishmentList to operation "معاينة" in shoosen estab row in table
@@ -166,11 +227,11 @@ class AdminRendementReservationController extends Controller
         $rendementReservation = RendementReservation::where("id",  $rendement_reservations_statistic->rendement_reservations_id)->first();
         //$rendement_reservations_employees = RendementReservationEmployee::with("employee")->where("rendement_reservations_id", $rendementReservation->id)->where("estab_mail_code", $establishment->estab_mail_code)->get();
         $rendement_reservations_employees =
-    RendementReservationEmployee::with("employee.adm")
-        ->where("rendement_reservations_id", $rendementReservation->id)
-        ->where("estab_mail_code", $establishment->estab_mail_code)
-        ->get()
-        ->groupBy(fn($item) => $item->employee->adm->ADM ?? 'بدون ADM');
+            RendementReservationEmployee::with("employee.adm")
+            ->where("rendement_reservations_id", $rendementReservation->id)
+            ->where("estab_mail_code", $establishment->estab_mail_code)
+            ->get()
+            ->groupBy(fn($item) => $item->employee->adm->ADM ?? 'بدون ADM');
 
         return view("admin.rendement_reservation.employee-list", ["rendement_reservations_employees" => $rendement_reservations_employees, "rendementReservation" => $rendementReservation, "rendement_reservations_statistic" => $rendement_reservations_statistic]);
     }
@@ -195,7 +256,7 @@ class AdminRendementReservationController extends Controller
    to togle  the status (open =0 /close) of rendemenReservation
    */
     public function status(Request $request)
-    {   //dd($request);
+    {
         $rendemenReservation =  RendementReservation::find($request->id);
         //  dd(intval($request->status));
         $rendemenReservation->status = intval($request->status);
@@ -244,7 +305,8 @@ class AdminRendementReservationController extends Controller
             foreach ($all_rendements as $adm => $admValue) {
                 $content = '';
                 foreach ($admValue as $randement) {
-                    $content .= "UPDATE PRPERS{$adm} SET TAUX='{$randement->point}', AFFECT='{$randement->affect}' WHERE matri='{$randement->MATRI}';\n";
+                    // $content .= "UPDATE PRPERS{$adm} SET TAUX='{$randement->point}', AFFECT='{$randement->affect}' WHERE matri='{$randement->MATRI}';\n";
+                    $content .= "UPDATE PRPERS{$adm} SET TAUX='{$randement->point}' WHERE matri='{$randement->MATRI}';\n";
                 }
                 $file_path = $path . DIRECTORY_SEPARATOR . "adm_{$adm}.txt";
                 Storage::disk("public")->put($file_path, $content);
@@ -311,7 +373,8 @@ class AdminRendementReservationController extends Controller
             // Generate content for the text file
             $content = '';
             foreach ($all_rendements as $randement) {
-                $content .= "UPDATE PRPERS{$adm} SET TAUX='{$randement->point}', AFFECT='{$randement->affect}' WHERE matri='{$randement->MATRI}';\n";
+                //$content .= "UPDATE PRPERS{$adm} SET TAUX='{$randement->point}', AFFECT='{$randement->affect}' WHERE matri='{$randement->MATRI}';\n";
+                $content .= "UPDATE PRPERS{$adm} SET TAUX='{$randement->point}' WHERE matri='{$randement->MATRI}';\n";
             }
 
             // Save the content to a text file

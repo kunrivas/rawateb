@@ -109,6 +109,9 @@ Route::group([
     Route::post('manager/rendements/establishment/open', [App\Http\Controllers\Admin\AdminRendementReservationController::class, 'openToEstablishment'])->name('admin-rendements-establishments-open');
     Route::get('manager/rendements/{rendement_reservations_id}/in-establishment', [App\Http\Controllers\Admin\AdminRendementReservationController::class, 'in_establishmentList'])->name('admin-rendements-in-establishments');
     Route::post('manager/rendements/{rendement_reservations_id}/in-establishment', [App\Http\Controllers\Admin\AdminRendementReservationController::class, 'in_establishmentList'])->name('admin-rendements-in-establishments');
+    Route::get('manager/rendements/{rendement_reservations_id}/not-reserved', [App\Http\Controllers\Admin\AdminRendementReservationController::class, 'emp_not_reserved'])->name('admin-rendements-not-reserved');
+    Route::post('manager/rendements/{rendement_reservations_id}/not-reserved', [App\Http\Controllers\Admin\AdminRendementReservationController::class, 'emp_not_reserved'])->name('admin-rendements-not-reserved');
+    
     Route::post('manager/rendements/export', [App\Http\Controllers\Admin\AdminRendementReservationController::class, 'exportRendement'])->name('admin-rendements-export');
     Route::post('manager/rendements/export-adm', [App\Http\Controllers\Admin\AdminRendementReservationController::class, 'exportADMRendement'])->name('admin-rendements-export-adm');
     /**
