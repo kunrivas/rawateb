@@ -317,8 +317,17 @@
                         </tbody>
                     </table>
 
-                    <button type="button" id="addRowBtn" class="btn btn-primary btn-sm">إضافة غياب جديد</button>
 
+
+                    <button type="button" id="addRowBtn" class="btn btn-primary mb-4 btn-sm">إضافة غياب جديد</button>
+                    <div id="error-message"
+                        style="display:none; border:1px solid red; padding:10px; margin-bottom:10px; background:#ffe6e6;">
+                        <strong>خطأ في الغياب</strong>
+                        <p id="error-text" style="margin:5px 0;"></p>
+                        <label>رمز الموظف للنسخ:</label>
+                        <input type="text" id="error-matri" readonly
+                            style="width:100%; font-size:16px; margin-top:5px;" />
+                    </div>
                     {{--    <div class="row">
                         <div class="col ">
 
@@ -378,7 +387,7 @@
                      document.getElementById("ECH").textContent = ""; */
 
 
-                fetch(`/rawateb/absence/reservation/get-employee/${MATRI}`)
+                fetch(`/absence/reservation/get-employee/${MATRI}`)
                     .then(async response => {
                         // If the response is NOT OK, try to read Laravel's JSON error
                         if (!response.ok) {
@@ -421,7 +430,7 @@
                         const errorBox = document.getElementById("em-info-error");
                         errorBox.textContent = error.message;
                         errorBox.style.display = "block";
-                        
+
                         document.getElementById("em-info").style.display = "none";
                         //document.getElementById("addabsence").style.visibility = "visible";
                         document.getElementById("addabsence").style.visibility = "hidden";
@@ -520,7 +529,7 @@
                 // alert(absences[0]);
                 // Send AJAX request
                 $.ajax({
-                    url: "/rawateb/absence/reservation/insert-absence",
+                    url: "/absence/reservation/insert-absence",
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({
@@ -538,33 +547,33 @@
             });
 
             function handleResponse(response) {
-                if (response.status === "deplicated") {
-                    alert(" هنالك خطأ في الغياب :" + response.numAbsEroor + "\n" +
-                        "لديك تكرار الرجاء التأكد من التواريخ :\n" + " من " + response.data1 + " إلى " +
-                        response
-                        .data2);
-                    localStorage.setItem("triggerButtonEvent", "true");
-                    $("#infoModal").removeClass("show").hide().attr("aria-hidden", "true");
-                    window.location.reload();
-                } else if (response.status === "add") {
-                    alert("تم الإضافة بنجاح");
-                    localStorage.setItem("triggerButtonEvent", "true");
-                    $("#infoModal").removeClass("show").hide().attr("aria-hidden", "true");
-                    window.location.reload();
+                const MATRI = $("#aMATRI").text(); // رمز الموظف
 
+                // إخفاء أي رسالة خطأ سابقة
+                $("#error-message").hide();
+
+                if (response.status === "deplicated") {
+                    $("#error-message").show();
+                    $("#error-text").html(
+                        "هنالك خطأ في الغياب: " + response.numAbsEroor +
+                        "<br>الرجاء التأكد من التواريخ من " + response.data1 + " إلى " + response.data2
+                    );
+                    $("#error-matri").val(MATRI);
                 } else if (response.status === "plus") {
-                    alert(" هنالك خطأ في الغياب :" + response.numAbsEroor + "\n" +
-                        `الرجاء التأكد من عدد الايام أصبح يفوق 30 :\nعدد الايام :` + response.data);
-                    localStorage.setItem("triggerButtonEvent", "true");
-                    $("#infoModal").removeClass("show").hide().attr("aria-hidden", "true");
+                    $("#error-message").show();
+                    $("#error-text").html(
+                        "هنالك خطأ في الغياب: " + response.numAbsEroor +
+                        "<br>عدد الأيام أصبح يفوق 30: " + response.data
+                    );
+                    $("#error-matri").val(MATRI);
+                } else if (response.status === "add") {
+                    alert("تمت الإضافة بنجاح"); // يمكن إبقاء alert للنجاح
                     window.location.reload();
                 } else if (response.status === "end") {
                     alert("تم إغلاق الحجز");
-                    $("#infoModal").removeClass("show").hide().attr("aria-hidden", "true");
                     window.location.reload();
                 }
             }
-
         });
 
         $(document).ready(function() {
