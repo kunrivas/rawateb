@@ -176,17 +176,16 @@ class SalaryMegrationController extends Controller
                         }  */
                         //dd( $filteredData);
 
-                    }
-                    elseif (str_contains($file, "PAVAR")) {
-                       // dd(1);
+                    } elseif (str_contains($file, "PAVAR")) {
+                        // dd(1);
                         //  use function processPavarFile to  to read excel file (in param file path)
                         // and return data[] ARRAY
                         $data = $this->processPavarFile($megration->path . DIRECTORY_SEPARATOR . $file, $request->ID_MEGRATION);
-                        
+
                         //  The data returned by processPapersFile is then inserted into the grants table
                         // in chunks of 1000 records to avoid memory overload.
                         foreach (array_chunk($data, 1000) as $t) {
-                          //  dd($t);
+                            //  dd($t);
                             grant::insert($t);
                         }
                     }
@@ -322,16 +321,13 @@ class SalaryMegrationController extends Controller
                     $header = $row;
                 } else {
                     $data[] = [
-                        'MATRI' =>  strlen($row[0]) == 7 ? "000" . $row[0] : $row[0],
+                        'MATRI' => strlen($row[0]) == 7 ? "000" . $row[0] : $row[0],
                         'IND' => $row[3],
                         'ADM' => $row[4],
-                        'BASENBR' => $row[5],
-                        'TAUX' =>  !empty($row[6]) ? $row[6] : null,
-                        'MONTANT' =>  !empty($row[7]) ? $row[7] : null,
-                        'MFIX' =>  !empty($row[8]) ? $row[8] : null,
-
-                        // Assuming 'ID_MEGRATION_RA' is not included in the CSV file
-                        // You can remove this line if ID_MEGRATION_RA is not needed from CSV
+                        'BASENBR' => !empty($row[5]) ? (int)$row[5] : null,
+                        'TAUX' => !empty($row[6]) ? (float)$row[6] : null,
+                        'MONTANT' => !empty($row[7]) ? (float)$row[7] : null,
+                        'MFIX' => !empty($row[8]) ? (float)$row[8] : null,
                         'ID_MEGRATION' => $ID_MEGRATION,
                     ];
                 }

@@ -13,16 +13,25 @@ class rappel_grant extends Model
 
     public function grant_info()
     {
-        return $this->belongsTo(grant_info::class,"IND","IND");
-    }
-    
-    function old_rappel_grant()
-    {
-        return $this->hasOne(rappel_grant::class, 'MATRI', 'MATRI')->where("SEQ", $this->SEQ)->where("IND", $this->IND)->where("ID_MEGRATION_RA", $this->ID_MEGRATION_RA)->where("OLDNEW", "A");
+        return $this->belongsTo(grant_info::class, "IND", "IND");
     }
 
+    /* public function old_rappel_grant()
+{
+    return $this->hasOne(rappel_grant::class, 'MATRI', 'MATRI')
+    ->where('rappel_grants.OLDNEW', 'A') 
+        ->whereColumn('SEQ', 'SEQ')
+        ->whereColumn('ID_MEGRATION_RA', 'ID_MEGRATION_RA')
+        ->whereColumn('ADM', 'ADM')
+        ->whereColumn('IND', 'IND');
+}
+
     public function rappel_grant_due()
-    {
-        return $this->hasOne(rappel_grant_due::class, 'MATRI', 'MATRI')->where("SEQ", $this->SEQ)->where("ID_MEGRATION_RA", $this->ID_MEGRATION_RA)->where("IND", $this->IND);
-    }
+{
+    return $this->hasOne(rappel_grant_due::class, 'MATRI', 'MATRI')
+        ->whereColumn('SEQ', 'SEQ')
+        ->whereColumn('ID_MEGRATION_RA', 'ID_MEGRATION_RA')
+        ->whereColumn('ADM', 'ADM')
+        ->whereColumn('IND', 'IND');
+} */
 }

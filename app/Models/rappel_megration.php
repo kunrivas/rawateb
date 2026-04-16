@@ -42,25 +42,33 @@ class rappel_megration extends Model
         return $this->hasMany(rappel_rasit::class,"MATRI","MATRI")->where("ID_MEGRATION_RA",$this->ID_MEGRATION_RA)->where("ADM",$this->ADM)->where("SEQ", $this->SEQ);
     }    
 
-    public function new_rappel_rasit()
-    {
-        return $this->hasOne(rappel_rasit::class,"MATRI","MATRI")->where("ID_MEGRATION_RA",$this->ID_MEGRATION_RA)->where("ADM",$this->ADM)->where("SEQ", $this->SEQ)->where("OLDNEW", "N");
-    }   
+  public function new_rappel_rasit()
+{
+    return $this->hasOne(rappel_rasit::class, "MATRI", "MATRI")
+        ->where("OLDNEW", "N");
+}
 
     public function old_rappel_rasit()
-    {
-        return $this->hasOne(rappel_rasit::class,"MATRI","MATRI")->where("ID_MEGRATION_RA",$this->ID_MEGRATION_RA)->where("ADM",$this->ADM)->where("SEQ", $this->SEQ)->where("OLDNEW", "A");
-    }   
+{
+    return $this->hasOne(rappel_rasit::class, "MATRI", "MATRI")
+        ->where("OLDNEW", "A");
+}  
 
-    public function rappel_grants()
-    {
-        return $this->hasMany(rappel_grant::class,"MATRI","MATRI")->where("ID_MEGRATION_RA",$this->ID_MEGRATION_RA)->where("ADM",$this->ADM)->where("SEQ", $this->SEQ)->orderBy("IND", "ASC");
-    }    
+  public function rappel_grants()
+{
+    return $this->hasMany(rappel_grant::class, "MATRI", "MATRI")
+        /* ->whereColumn('rappel_grants.SEQ', 'rappel_megrations.SEQ')
+        ->whereColumn('rappel_grants.ID_MEGRATION_RA', 'rappel_megrations.ID_MEGRATION_RA')
+        ->whereColumn('rappel_grants.ADM', 'rappel_megrations.ADM') */
+        ->orderBy("IND", "ASC");
+}   
 
-    public function new_rappel_grants()
-    {
-        return $this->hasMany(rappel_grant::class,"MATRI","MATRI")->where("ID_MEGRATION_RA",$this->ID_MEGRATION_RA)->where("ADM",$this->ADM)->where("SEQ", $this->SEQ)->where("OLDNEW", "N")->orderBy("IND", "ASC");
-    }   
-
+/* public function new_rappel_grants()
+{
+    return $this->hasMany(rappel_grant::class, "MATRI", "MATRI")
+        ->where("rappel_grants.OLDNEW", "N") 
+        ->orderBy("IND", "ASC");
+} 
+ */
      
 }
