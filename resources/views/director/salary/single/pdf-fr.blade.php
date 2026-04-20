@@ -128,7 +128,7 @@
                 <td colspan="4" class="aligncenter font24"> Ministère de l'Education Nationale</td>
             </tr>
             <tr>
-                <td colspan="3" class="font16"> Direction de l'Éducation de l'Etat d'El Oued</td>
+                <td colspan="3" class="font16"> Direction de l'Éducation de Wilaya d'El Oued</td>
                 <td>Déclaration de salaire du mois {{($salary_single->megration->MONTH) }} /
                     {{ $salary_single->megration->YEAR }}</td>
             </tr>

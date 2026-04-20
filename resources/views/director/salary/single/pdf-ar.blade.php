@@ -184,12 +184,17 @@
                     <span>/</span><span>{{ $salary_single->NUMCPT }}</span>
                 </td>
             </tr>
-            <tr class="info-last">
+            {{-- <tr>
                 <td class="info" colspan="3"> <span>تاريخ التوظيف :</span>
                     <span>{{ Mlibrary::getDateFormat($employee->DATENT) }}</span>
                 </td>
+            </tr> --}}
+            <tr class="info-last">
                 <td class="info" colspan="3"> <span>مكان العمل:</span>
                     <span>{{ $salary_single->AFFECT }}</span>
+                </td>
+                 <td class="info" colspan="3"> <span>ايام العمل:</span>
+                    <span>{{ $salary_single->NBRTRAV - $salary_single->ABSE }}</span>
                 </td>
             </tr>
             <tr>
@@ -290,10 +295,7 @@
                                 </tr>
                             @endforeach
 
-                            <tr>
-                                <td>ايام العمل</td>
-                                <td>{{ $salary_single->NBRTRAV }}</td>
-                            </tr>
+
                             {{--  @if (array_key_exists(999, $salary_grants['retenues']['inds']))
                                 <tr>
                                     <td>{{ $salary_grants['retenues']['inds'][999]->grant_info->LIBINDA }}</td>
@@ -302,7 +304,7 @@
                                     </td>
                                 </tr>
                             @endif --}}
-                              <tr>
+                            <tr>
                                 <td>الصافي المدفوع </td>
                                 <td> {{ number_format($salary_single->NETPAI, 2) }}</td>
                             </tr>

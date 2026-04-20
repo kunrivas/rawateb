@@ -99,7 +99,7 @@ class RappelController extends Controller
     { //dd($request->all());
 
         $rappel = rappel_megration::with([
-
+    
             'employee',
 
             'ra_megration:ID_MEGRATION_RA,TITLE,YEAR,LOT',

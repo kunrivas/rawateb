@@ -238,6 +238,7 @@ class SalaryMegrationController extends Controller
                             'ADM' => $row[2],
                             'TOTGAIN' => $row[38],
                             'NETPAI' =>  !empty($row[41]) ? $row[41] : null,
+                            'ABSE' => $row[48],
                             'NBRTRAV' => $row[49],
                             'BRUTSS' =>  !empty($row[35]) ? $row[35] : null,
                             'RETSS' =>  !empty($row[36]) ? $row[36] : null,
