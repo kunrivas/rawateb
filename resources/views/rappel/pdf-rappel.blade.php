@@ -1,5 +1,5 @@
 @php
-   
+
     $_retenues_inds = [610, 980, 660, 399, 397, 398, 999];
     $_primes_family_inds = [992, 991, 990, 401];
     $_primes_base_inds = [001, 101];
@@ -123,14 +123,22 @@
         <td colspan="3" class="font16"> مديرية التربية لولاية الوادي </td>
     </tr>
     <tr>
-        <td colspan="3"> <span>المؤسسة: </span><span> @if (is_null(session()->get("establishment"))) /@else{{ session()->get("establishment")->estab_ar_name }}  @endif </span></td>
+        <td colspan="3"> <span>المؤسسة: </span><span>
+                @if (is_null(session()->get('establishment')))
+                    /@else{{ session()->get('establishment')->estab_ar_name }}
+                @endif
+            </span></td>
 
     </tr>
     <tr>
-        <td> <span>رمز المؤسسة:</span> <span>  @if (is_null(session()->get("establishment"))) /@else{{ session()->get("establishment")->estab_rawateb_user }} @endif   </span>  </td>
+        <td> <span>رمز المؤسسة:</span> <span>
+                @if (is_null(session()->get('establishment')))
+                    /@else{{ session()->get('establishment')->estab_rawateb_user }}
+                @endif
+            </span> </td>
     </tr>
     <tr>
-        <td colspan="4" class="aligncenter font24">{{ $rappel->ra_megration->TITLE ?? '/'}}</td>
+        <td colspan="4" class="aligncenter font24">{{ $rappel->ra_megration->TITLE ?? '/' }}</td>
     </tr>
 </table>
 <div id="page2print" style="direction: rtl;">
@@ -149,11 +157,20 @@
                         <td class="fp-title" style="width: 90px">الإسم واللقب:</td>
                         <td>
                             &nbsp;<b> {{ $rappel->employee->NOMA }} {{ $rappel->employee->PRENOMA }}
-                                {{ $rappel->MATRI }}</b>
+                                {{ $rappel->MATRI }} </b>
                         </td>
                         <td style="width: 20%"></td>
                         <td style="text-align: left">السنة المالية:</td>
-                        <td> {{$rappel->ra_megration->YEAR ?? 0 }}</td>
+                        <td> {{ $rappel->ra_megration->YEAR ?? 0 }}</td>
+                    </tr>
+                    <tr>
+
+                        <td class="fp-title" style="width: 120px">رقم الحساب:</td>
+                        <td> <b> <span>{{ $rappel->CLECPT }}</span>
+                                <span>/</span><span>{{ $rappel->NUMCPT }}</span></b>
+                        <td class="fp-title" style="width: 120px">الضمان الإجتماعي:</td>
+                        <td> <b> {{ $rappel->NUMSS }} </b>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -186,7 +203,7 @@
 
                                                 {{ $rappel->NBRJ }}
 
-                                                :غياب/
+                                                / غ
 
                                                 {{ $rappel->JRABS }}
                                             </b>
@@ -211,7 +228,8 @@
                                     </tr>
                                     <tr>
                                         <td>الجديدة</td>
-                                        <td style="text-align: center">{{ $rappel->new_rappel_rasit->CATEG ?? '/' }} </td>
+                                        <td style="text-align: center">{{ $rappel->new_rappel_rasit->CATEG ?? '/' }}
+                                        </td>
 
                                         <td style="text-align: center">
 
@@ -282,7 +300,7 @@
         <br>
         <br>
         <br>
-        @if (!empty($rappel->new_rappel_grants))
+        @if (!empty($grants))
             <div>
                 <table class="case">
                     <thead>
@@ -298,125 +316,85 @@
                     </thead>
                     <tbody>
                         <!---->
-                        @foreach ($rappel->new_rappel_grants as $key => $value)
-                            @if (in_array($value->IND, $_primes_base_inds))
-                                <tr>
-                                    <td style="width: 5%;"><b>{{ $value->IND }}</b></td>
-                                    <td style="width: 30%;"><b>{{ $value->grant_info->LIBINDA ?? '/' }}</b></td>
+                        @foreach ($grants as $value)
+                            @php
+                                $isBase = in_array($value->IND, $_primes_base_inds);
+                                $isFamily = in_array($value->IND, $_primes_family_inds);
+                                $isRetenue = in_array($value->IND, $_retenues_inds);
+                            @endphp
 
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->MONTANT, 2) }}
-                                    </td>
-                                    <td style="width: 16%;"> {{ number_format($value->old_rappel_grant->MONTANT ?? 0, 2) }}
-                                    </td>
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->MONTANT - ($value->old_rappel_grant->MONTANT ?? 0), 2) }}
-                                    </td>
-                                    <td style="width: 16%;">{{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}</td>
-                                </tr>
-                            @endif
-                        @endforeach
-                        @foreach ($rappel->new_rappel_grants as $key => $value)
-                            @if (
-                                !in_array($value->IND, $_primes_base_inds) &&
-                                    !in_array($value->IND, $_primes_family_inds) &&
-                                    !in_array($value->IND, $_retenues_inds))
+                            {{-- 🔵 BASE --}}
+                            @if ($isBase)
                                 <tr>
-                                    <td style="width: 5%; "><b>{{ $value->IND }}</b></td>
-                                    <td style="width: 30%;"><b>{{ $value->grant_info->LIBINDA ?? '/' }}</b></td>
-
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->MONTANT, 2) }}
-                                    </td>
-                                    <td style="width: 16%;"> {{ number_format($value->old_rappel_grant->MONTANT ?? 0, 2) }}
-                                    </td>
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->MONTANT - ($value->old_rappel_grant->MONTANT ?? 0), 2) }}
-                                    </td>
-                                    <td style="width: 16%;">{{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}</td>
+                                    <td><b>{{ $value->IND }}</b></td>
+                                    <td><b>{{ $value->LIBINDA ?? '/' }}</b></td>
+                                    <td>{{ number_format($value->MONTANT, 2) }}</td>
+                                    <td>{{ number_format($value->old_montant ?? 0, 2) }}</td>
+                                    <td>{{ number_format($value->MONTANT - ($value->old_montant ?? 0), 2) }}</td>
+                                    <td>{{ number_format($value->due_montant ?? 0, 2) }}</td>
                                 </tr>
-                            @endif
-                        @endforeach
-                        @foreach ($rappel->new_rappel_grants as $key => $value)
-                            @if (in_array($value->IND, $_primes_family_inds))
+
+                                {{-- 🟢 FAMILY --}}
+                            @elseif ($isFamily)
                                 <tr>
-                                    <td style="width: 5%;"><b>{{ $value->IND }}</b></td>
-                                    <td style="width: 30%;"><b>{{ $value->grant_info->LIBINDA ?? '/' }}</b></td>
-
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->MONTANT, 2) }}
-                                    </td>
-                                    <td style="width: 16%;"> {{ number_format($value->old_rappel_grant->MONTANT ?? 0, 2) }}
-                                    </td>
-                                    <td style="width: 16%;">
-                                        {{ number_format($value->MONTANT - ($value->old_rappel_grant->MONTANT ?? 0), 2) }}
-                                    </td>
-                                    <td style="width: 16%;">{{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}</td>
+                                    <td><b>{{ $value->IND }}</b></td>
+                                    <td><b>{{ $value->LIBINDA ?? '/' }}</b></td>
+                                    <td>{{ number_format($value->MONTANT, 2) }}</td>
+                                    <td>{{ number_format($value->old_montant ?? 0, 2) }}</td>
+                                    <td>{{ number_format($value->MONTANT - ($value->old_montant ?? 0), 2) }}</td>
+                                    <td>{{ number_format($value->due_montant ?? 0, 2) }}</td>
                                 </tr>
-                            @endif
-                        @endforeach
-                        @foreach ($rappel->new_rappel_grants as $key => $value)
-                            @if (in_array($value->IND, $_retenues_inds))
-                                @if ($value->IND == '610')
+
+                                {{-- 🟡 OTHER --}}
+                            @elseif (!$isBase && !$isFamily && !$isRetenue)
+                                <tr>
+                                    <td><b>{{ $value->IND }}</b></td>
+                                    <td><b>{{ $value->LIBINDA ?? '/' }}</b></td>
+                                    <td>{{ number_format($value->MONTANT, 2) }}</td>
+                                    <td>{{ number_format($value->old_montant ?? 0, 2) }}</td>
+                                    <td>{{ number_format($value->MONTANT - ($value->old_montant ?? 0), 2) }}</td>
+                                    <td>{{ number_format($value->due_montant ?? 0, 2) }}</td>
+                                </tr>
+
+                                {{-- 🔴 RETENUES --}}
+                            @elseif ($isRetenue)
+                                {{-- 610 --}}
+                                @if ($value->IND == 610)
                                     <tr>
-                                        <td style="width: 5%;"><b>{{ $value->IND }}</b></td>
-                                        <td style="width: 30%;"><b>{{ 'المبلغ الخام' }}</b></td>
-
-                                        <td style="width: 16%;">
-                                            <b> {{ number_format($value->BASENBR, 2) }}</b>
+                                        <td><b>{{ $value->IND }}</b></td>
+                                        <td><b>المبلغ الخام</b></td>
+                                        <td><b>{{ number_format($value->BASENBR, 2) }}</b></td>
+                                        <td><b>{{ number_format($value->old_basenbr ?? 0, 2) }}</b></td>
+                                        <td><b>{{ number_format($value->BASENBR - ($value->old_basenbr ?? 0), 2) }}</b>
                                         </td>
-                                        <td style="width: 16%;">
-                                            <b> {{ number_format($value->old_rappel_grant->BASENBR ?? 0, 2) }}</b>
-                                        </td>
-                                        <td style="width: 16%;">
-                                            <b>
-                                                {{ number_format($value->BASENBR - ($value->old_rappel_grant->BASENBR ?? 0), 2) }}</b>
-                                        </td>
-                                        <td style="width: 16%;">
-                                            <b>{{ number_format($value->rappel_grant_due->BASENBR ?? 0, 2) }}</b>
-                                        </td>
+                                        <td><b>{{ number_format($value->due_basenbr ?? 0, 2) }}</b></td>
                                     </tr>
-                                @endif
-                                @if ($value->IND == '999')
+
+                                    {{-- 999 --}}
+                                @elseif ($value->IND == 999)
                                     <tr>
-                                        <td style="width: 5%;"><b>{{ $value->IND }}</b></td>
-                                        <td style="width: 30%;"><b>{{ $value->grant_info->LIBINDA ?? '/' }}</b></td>
-
-                                        <td style="width: 16%;">
-                                            <b> {{ number_format($value->MONTANT, 2) }}</b>
+                                        <td><b>{{ $value->IND }}</b></td>
+                                        <td><b>{{ $value->LIBINDA ?? '/' }}</b></td>
+                                        <td><b>{{ number_format($value->MONTANT, 2) }}</b></td>
+                                        <td><b>{{ number_format($value->old_montant ?? 0, 2) }}</b></td>
+                                        <td><b>{{ number_format($value->MONTANT - ($value->old_montant ?? 0), 2) }}</b>
                                         </td>
-                                        <td style="width: 16%;">
-                                            <b> {{ number_format($value->old_rappel_grant->MONTANT ?? 0, 2) }}</b>
-                                        </td>
-                                        <td style="width: 16%;">
-                                            <b>
-                                                {{ number_format($value->MONTANT - ($value->old_rappel_grant->MONTANT ?? 0), 2) }}</b>
-                                        </td>
-                                        <td style="width: 16%;">
-                                            <b>{{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}</b>
-                                        </td>
+                                        <td><b>{{ number_format($value->due_montant ?? 0, 2) }}</b></td>
                                     </tr>
+
+                                    {{-- باقي retenues --}}
                                 @else
                                     <tr>
-                                        <td style="width: 5%;"><b>{{ $value->IND }}</b></td>
-                                        <td style="width: 30%;"><b>{{ $value->grant_info->LIBINDA ?? '/' }}</b></td>
-
-                                        <td style="width: 16%;">
-                                            {{ number_format($value->MONTANT, 2) }}
-                                        </td>
-                                        <td style="width: 16%;">
-                                            {{ number_format($value->old_rappel_grant->MONTANT ?? 0, 2) }}
-                                        </td>
-                                        <td style="width: 16%;">
-                                            {{ number_format($value->MONTANT - ($value->old_rappel_grant->MONTANT ?? 0), 2) }}
-                                        </td>
-                                        <td style="width: 16%;">{{ number_format($value->rappel_grant_due->MONTANT ?? 0, 2) }}
-                                        </td>
+                                        <td><b>{{ $value->IND }}</b></td>
+                                        <td><b>{{ $value->LIBINDA ?? '/' }}</b></td>
+                                        <td>{{ number_format($value->MONTANT, 2) }}</td>
+                                        <td>{{ number_format($value->old_montant ?? 0, 2) }}</td>
+                                        <td>{{ number_format($value->MONTANT - ($value->old_montant ?? 0), 2) }}</td>
+                                        <td>{{ number_format($value->due_montant ?? 0, 2) }}</td>
                                     </tr>
                                 @endif
                             @endif
                         @endforeach
-
                     </tbody>
                 </table>
             </div>
@@ -429,7 +407,7 @@
                 <tbody>
                     <tr>
                         <td>
-                            <div>رمز المخلف :{{ $rappel->ra_megrations->LOT ??' ' }}</div>
+                            <div>رمز المخلف :{{ $rappel->ra_megration->LOT ?? ' ' }}</div>
 
                             <div><strong>ملاحظة هامة</strong></div>
                             تسلم نسخة للمعني وتوضع أخرى في الملف

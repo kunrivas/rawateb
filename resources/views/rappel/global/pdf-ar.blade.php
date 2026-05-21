@@ -92,7 +92,7 @@
 <body>
     <div align="center">
         <table style="width:920px;" class="font16">
-           
+
             <tr>
                 <td colspan="4" class="aligncenter font24"> الجمهورية الجزائرية الديمقراطية الشعبية </td>
 
@@ -112,7 +112,7 @@
                         @endif
                     </span></td>
                 @if ($adm != null)
-                    <td> <span>الادارة: </span><span>{{ $adm->LIBTABA }}</span></td>
+                    <td> <span>الادارة: </span><span>{{ $adm }}</span></td>
                 @endif
             </tr>
             <tr>
@@ -124,7 +124,7 @@
             </tr>
 
         </table>
-     
+
         <table class="case">
             <thead>
                 <tr>
@@ -143,20 +143,20 @@
             <tbody>
 
                 @if (!empty($data))
-                    @foreach ($data as $key => $value)
+                    @foreach ($data as $value)
                         <tr>
-                            <td>{{ $value['matri'] }}</td>
-                            <td>{{ $value['AFFECT'] }}</td>
-                            <td>{{ $value['fullName'] }}</td>
-                            <td>{{ $value['SITFAM'] }}</td>
+                            <td>{{ $value->MATRI }}</td>
+                            <td>{{ $value->AFFECT }}</td>
+                            <td>{{ $value->NOMA . ' ' . $value->PRENOMA }}</td>
+                            <td>{{ $value->SITFAM }}</td>
                             <td>
-                                <div>{{ $value['CATEG'] }}</div>
-                                <div>{{ $value['ECH'] }}</div>
+                                <div>{{ $value->CATEG }}</div>
+                                <div>{{ $value->ECH }}</div>
                             </td>
-                            <td> {{ number_format($value['gross_due'], 2) }}</td>
-                            <td> {{ number_format($value['ss_due'], 2) }}</td>
-                            <td> {{ number_format($value['tax_due'], 2) }}</td>
-                            <td> {{ number_format($value['net_due'], 2) }}</td> 
+                            <td>{{ number_format($value->gross_due ?? 0, 2) }}</td>
+                            <td>{{ number_format($value->ss_due ?? 0, 2) }}</td>
+                            <td>{{ number_format($value->tax_due ?? 0, 2) }}</td>
+                            <td>{{ number_format($value->net_due ?? 0, 2) }}</td>
                         </tr>
                     @endforeach
                 @else
@@ -165,7 +165,6 @@
                         <td colspan="9">There are no data.</td>
 
                     </tr>
-
                 @endif
             </tbody>
 

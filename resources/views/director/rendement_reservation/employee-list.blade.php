@@ -244,9 +244,9 @@
                             <div class="col-6">
                                 <p class="mr-3"><strong>المؤسسة العمل : </strong> <span id="estab"></span></p>
                             </div>
-                            <div class="col">
+                      <div class="col">
                                 <p class="mr-3"><strong>عدد ايام الغياب : </strong> <span id="abs"></span></p>
-                            </div>
+                            </div> 
                         </div>
                     </div>
 
@@ -306,7 +306,7 @@
                             $("#SITFAM").text(data.SITFAM);
                             $("#CATEG").text(data.CATEG);
                             $("#ECH").text(data.ECH);
-                            $("#abs").text(data.abs);
+                             $("#abs").text(data.abs); 
                             if (data.fonction) {
                                 $("#maxpoint").val(data.fonction.TAUXPR);
                                 maxpoint = parseInt(data.fonction.TAUXPR);

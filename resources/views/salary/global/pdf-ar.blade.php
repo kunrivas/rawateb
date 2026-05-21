@@ -196,7 +196,7 @@
                                 <div>{{ $value['CATEG'] }}</div>
                                 <div>{{ $value['ECH'] }}</div>
                             </td>
-                            <td>{{ $value['NBRTRAV'] }}</td>
+                            <td>{{ $value['NBRTRAV']}}</td>
                             <td>
                                 <div>{{ array_key_exists('V001', $value) ? $value['V001'] : '/' }}</div>
                                 <div>{{ array_key_exists('V101', $value) ? $value['V101'] : '/' }}</div>

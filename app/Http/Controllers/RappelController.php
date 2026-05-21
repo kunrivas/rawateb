@@ -8,6 +8,7 @@ use App\Models\employee;
 use App\Models\ra_megration;
 use Illuminate\Http\Request;
 use App\Models\rappel_megration;
+use Illuminate\Support\Facades\DB;
 
 class RappelController extends Controller
 {
@@ -94,14 +95,95 @@ class RappelController extends Controller
 
 
     public function rappel_print(Request $request)
-    {
+    { //dd($request->all());
 
-        //dd($request);
+        $rappel = rappel_megration::with([
 
-        $rappel = rappel_megration::where("MATRI", $request->MATRI)->where("SEQ", $request->SEQ)->where("ID_MEGRATION_RA", $request->ID_MEGRATION_RA)->first();
-        //$rappel = rappel_megration::where("MATRI", "0000247")->where("SEQ", $request->SEQ)->where("ID_MEGRATION_RA", $request->ID_MEGRATION_RA)->first();
+            'employee',
 
-        //dd($rappel);
+            'ra_megration:ID_MEGRATION_RA,TITLE,YEAR,LOT',
+
+            // 🔥 NEW RASIT
+            'new_rappel_rasit' => function ($q) use ($request) {
+                $q->select('ID', 'MATRI', 'SEQ', 'ID_MEGRATION_RA', 'ADM', 'CATEG', 'ECH', 'SITFAM', 'CODEFONC')
+                    ->where("OLDNEW", "N")
+                    ->where("SEQ", $request->SEQ)
+                    ->where("ID_MEGRATION_RA", $request->ID_MEGRATION_RA)
+                    /* ->where("ADM", $request->ADM)*/;
+            },
+
+            'new_rappel_rasit.fonction:CODEFONC,LIBTABA',
+
+            // 🔥 OLD RASIT
+            'old_rappel_rasit' => function ($q) use ($request) {
+                $q->select('ID', 'MATRI', 'SEQ', 'ID_MEGRATION_RA', 'ADM', 'CATEG', 'ECH', 'SITFAM', 'CODEFONC')
+                    ->where("OLDNEW", "A")
+                    ->where("SEQ", $request->SEQ)
+                    ->where("ID_MEGRATION_RA", $request->ID_MEGRATION_RA)
+                    /* ->where("ADM", $request->ADM) */;
+            },
+
+            'old_rappel_rasit.fonction:CODEFONC,LIBTABA',
+        ])
+            ->where("MATRI", $request->MATRI)
+            ->where("SEQ", $request->SEQ)
+            ->where("ID_MEGRATION_RA", $request->ID_MEGRATION_RA)
+            ->firstOrFail();
+
+        $grants = DB::table('rappel_grants as rg')
+
+            // 🔵 OLD
+            ->leftJoin('rappel_grants as old', function ($join) {
+                $join->on('old.MATRI', '=', 'rg.MATRI')
+                    ->on('old.SEQ', '=', 'rg.SEQ')
+                    ->on('old.ID_MEGRATION_RA', '=', 'rg.ID_MEGRATION_RA')
+                    ->on('old.IND', '=', 'rg.IND')
+                    ->where('old.OLDNEW', 'A');
+            })
+
+            // 🟣 DUE
+            ->leftJoin('rappel_grant_dues as due', function ($join) {
+                $join->on('due.MATRI', '=', 'rg.MATRI')
+                    ->on('due.SEQ', '=', 'rg.SEQ')
+                    ->on('due.ID_MEGRATION_RA', '=', 'rg.ID_MEGRATION_RA')
+                    ->on('due.IND', '=', 'rg.IND');
+            })
+
+            // 🟢 GRANT INFO (🔥 الجديد)
+            ->leftJoin('grant_infos as gi', 'gi.IND', '=', 'rg.IND')
+
+            ->select(
+                'rg.MATRI',
+                'rg.SEQ',
+                'rg.ID_MEGRATION_RA',
+                'rg.ADM',
+                'rg.IND',
+                'rg.MONTANT',
+                'rg.BASENBR',
+
+                // 🔥 LIBINDA
+                'gi.LIBINDA',
+
+                'old.MONTANT as old_montant',
+                'old.BASENBR as old_basenbr',
+
+                'due.MONTANT as due_montant',
+                'due.BASENBR as due_basenbr'
+            )
+
+            ->where('rg.OLDNEW', 'N')
+            ->where('rg.MATRI', $request->MATRI)
+            ->where('rg.SEQ', $request->SEQ)
+            ->where('rg.ID_MEGRATION_RA', $request->ID_MEGRATION_RA)
+
+            ->when($request->ADM, function ($q) use ($request) {
+                $q->where('rg.ADM', $request->ADM);
+            })
+
+            ->orderBy('rg.IND', 'ASC')
+            ->get();
+
+        // dd($rappel);
 
         if (!defined('_MPDF_TTFONTPATH')) {
             // an absolute path is preferred, trailing slash required:
@@ -165,7 +247,7 @@ class RappelController extends Controller
 
         $mpdf = new CMPDF();
         $mpdf->initialize($settings);
-        $mpdf->viewToPDF('rappel/pdf-rappel', ["rappel" => $rappel, "serv" => []]);
+        $mpdf->viewToPDF('rappel/pdf-rappel', ["rappel" => $rappel, "grants" => $grants, "serv" => []]);
 
         //can use these functions :
         // $mpdf->getObject()->pdf_version = '1.5';
@@ -175,7 +257,7 @@ class RappelController extends Controller
     }
 
     public function rappel_global_list()
-    {// dd(1);
+    { // dd(1);
         $ra_megrations = ra_megration::orderBy("YEAR", "DESC")->paginate(10);
         $adms = adm::all();
         //passing variable $megrations with returning view
@@ -185,74 +267,105 @@ class RappelController extends Controller
 
     public function rappel_global_print(Request $request)
     {
-        $current_megration =  ra_megration::where('ID_MEGRATION_RA', $request->ID_MEGRATION_RA)->first();
+        ini_set('max_execution_time', 300);
+        ini_set('memory_limit', '1024M');
+
+        $adm = $request->ADM;
+
+        $current_megration = ra_megration::where(
+            'ID_MEGRATION_RA',
+            $request->ID_MEGRATION_RA
+        )->first();
+
         if ($current_megration === null) {
             return redirect()->back();
         }
 
         $establishment = session()->get("establishment");
 
-        $rappel_megrations_query = rappel_megration::join('employees', 'rappel_megrations.MATRI', '=', 'employees.MATRI');
+        $view_data = DB::table('rappel_megrations as rm')
 
-        if (env("APP_ENV", "local") != "local") {
-            $rappel_megrations_query = $rappel_megrations_query->where("employees.AFFECT", $establishment->estab_rawateb_user);
-        } else {
-            $rappel_megrations_query = $rappel_megrations_query->where("employees.AFFECT", "390904");
-        }
+            ->join('employees as e', 'e.MATRI', '=', 'rm.MATRI')
 
-        $rappel_megrations = $rappel_megrations_query
-            ->where("rappel_megrations.ADM", $request->ADM)
-            ->where("rappel_megrations.ID_MEGRATION_RA", $current_megration->ID_MEGRATION_RA)
-         /*    ->with(['new_rappel_grants.rappel_grant_due', 'new_rappel_rasit']) */
+            ->leftJoin('rappel_rasits as rr', function ($join) {
+                $join->on('rr.MATRI', '=', 'rm.MATRI')
+                    ->on('rr.SEQ', '=', 'rm.SEQ')
+                    ->on('rr.ID_MEGRATION_RA', '=', 'rm.ID_MEGRATION_RA')
+                    ->on('rr.ADM', '=', 'rm.ADM')
+                    ->where('rr.OLDNEW', '=', 'N');
+            })
+
+            ->leftJoin('rappel_grants as rg', function ($join) {
+                $join->on('rg.MATRI', '=', 'rm.MATRI')
+                    ->on('rg.SEQ', '=', 'rm.SEQ')
+                    ->on('rg.ID_MEGRATION_RA', '=', 'rm.ID_MEGRATION_RA')
+                    ->on('rg.ADM', '=', 'rm.ADM')
+                    ->where('rg.OLDNEW', '=', 'N');
+            })
+
+            ->leftJoin('rappel_grant_dues as rd', function ($join) {
+                $join->on('rd.MATRI', '=', 'rg.MATRI')
+                    ->on('rd.SEQ', '=', 'rg.SEQ')
+                    ->on('rd.ID_MEGRATION_RA', '=', 'rg.ID_MEGRATION_RA')
+                    ->on('rd.ADM', '=', 'rg.ADM')
+                    ->on('rd.IND', '=', 'rg.IND');
+            })
+
+            ->where('rm.ADM', $request->ADM)
+            ->where('rm.ID_MEGRATION_RA', $current_megration->ID_MEGRATION_RA)
+
+            ->when(env("APP_ENV") != "local", function ($query) use ($establishment) {
+                $query->where('e.AFFECT', $establishment->estab_rawateb_user);
+            }, function ($query) {
+                $query->where('e.AFFECT', '390904');
+            })
+
             ->select(
-                'rappel_megrations.*',
-                'employees.NOMA',
-                'employees.PRENOMA',
-                'rappel_megrations.ADM as ADM',
-                'employees.AFFECT as AFFECT'
+                'rm.MATRI',
+                'e.NOMA',
+                'e.PRENOMA',
+                'e.AFFECT',
+
+                DB::raw("MAX(rr.SITFAM) as SITFAM"),
+                DB::raw("MAX(rr.CATEG) as CATEG"),
+                DB::raw("MAX(rr.ECH) as ECH"),
+
+                DB::raw("MAX(CASE WHEN rg.IND = '610' THEN rd.BASENBR END) as gross_due"),
+                DB::raw("MAX(CASE WHEN rg.IND = '980' THEN rd.MONTANT END) as ss_due"),
+                DB::raw("MAX(CASE WHEN rg.IND = '660' THEN rd.MONTANT END) as tax_due"),
+                DB::raw("MAX(CASE WHEN rg.IND = '999' THEN rd.MONTANT END) as net_due")
             )
+
+            ->groupBy(
+                'rm.MATRI',
+                'e.NOMA',
+                'e.PRENOMA',
+                'e.AFFECT'
+            )
+
             ->get();
-        //    dd($rappel_megrations);
-        $adm = adm::where("ADM", $request->ADM)->first();
-        $view_data = [];
+        // dd(count($view_data));
 
-        foreach ($rappel_megrations as $rappel) {
-            $item = [
-                "matri" => $rappel->MATRI,
-                "AFFECT" => $rappel->AFFECT,
-                "fullName" => $rappel->NOMA . ' ' . $rappel->PRENOMA,
-                "SITFAM" => $rappel->new_rappel_rasit->SITFAM ?? '/',
-                "CATEG" => $rappel->new_rappel_rasit->CATEG ?? '/',
-                "ECH" => $rappel->new_rappel_rasit->ECH ?? '/',
-                "gross_due" => 0,
-                "ss_due" => 0,
-                "tax_due" => 0,
-                "net_due" => 0,
-            ];
+        /*
+    |--------------------------------------------------------------------------
+    | PDF
+    |--------------------------------------------------------------------------
+    */
 
-            foreach ($rappel->new_rappel_grants as $value) {
-                $ind = trim((string) $value->IND);
-
-                if ($ind === '610') {
-                    $item["gross_due"] = $value->rappel_grant_due->BASENBR ?? 0;
-                } elseif ($ind === '980') {
-                    $item["ss_due"] = $value->rappel_grant_due->MONTANT ?? 0;
-                } elseif ($ind === '660') {
-                    $item["tax_due"] = $value->rappel_grant_due->MONTANT ?? 0;
-                } elseif ($ind === '999') {
-                    $item["net_due"] = $value->rappel_grant_due->MONTANT ?? 0;
-                }
-            }
-            
-            $view_data[] = $item;
-        } //dd($view_data); 
-    
         $mpdf = new CMPDF();
+
         $mpdf->initialize([
             'orientation' => 'L',
         ]);
 
-        $mpdf->viewToPDF('rappel/global/pdf-ar', ['data' => $view_data, "adm" => $adm, "current_megration" => $current_megration]);
+        $mpdf->viewToPDF(
+            'rappel/global/pdf-ar',
+            [
+                'data' => $view_data,
+                'adm' => $adm,
+                'current_megration' => $current_megration
+            ]
+        );
 
         $mpdf->outPut('I');
     }

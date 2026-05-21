@@ -99,7 +99,7 @@ class RappelController extends Controller
     { //dd($request->all());
 
         $rappel = rappel_megration::with([
-    
+
             'employee',
 
             'ra_megration:ID_MEGRATION_RA,TITLE,YEAR,LOT',
@@ -125,53 +125,6 @@ class RappelController extends Controller
             },
 
             'old_rappel_rasit.fonction:CODEFONC,LIBTABA',
-
-            /*      'rappel_grants' => function ($q) use ($request) {
-          $q->from('rappel_grants as rg')
-        ->whereColumn('rg.MATRI', 'rappel_megrations.MATRI') // ✅ هذا الربط الوحي
-        ->leftJoin('rappel_grants as old', function ($join) {
-            $join->on('old.MATRI', '=', 'rg.MATRI')
-                ->on('old.SEQ', '=', 'rg.SEQ')
-                ->on('old.ID_MEGRATION_RA', '=', 'rg.ID_MEGRATION_RA')
-                ->on('old.IND', '=', 'rg.IND')
-                ->where('old.OLDNEW', 'A');
-        })
-
-        ->leftJoin('rappel_grant_dues as due', function ($join) {
-            $join->on('due.MATRI', '=', 'rg.MATRI')
-                ->on('due.SEQ', '=', 'rg.SEQ')
-                ->on('due.ID_MEGRATION_RA', '=', 'rg.ID_MEGRATION_RA')
-                ->on('due.IND', '=', 'rg.IND');
-        })
-
-        ->select(
-            'rg.MATRI',
-            'rg.SEQ',
-            'rg.ID_MEGRATION_RA',
-            'rg.ADM',
-            'rg.IND',
-            'rg.MONTANT',
-            'rg.BASENBR',
-            'old.MONTANT as old_montant',
-            'old.BASENBR as old_basenbr',
-            'due.MONTANT as due_montant',
-            'due.BASENBR as due_basenbr'
-        )
-
-        ->where('rg.OLDNEW', 'N')
-        ->where('rg.SEQ', $request->SEQ)
-        ->where('rg.ID_MEGRATION_RA', $request->ID_MEGRATION_RA)
-
-        ->when($request->ADM, function ($qq) use ($request) {
-            $qq->where('rg.ADM', $request->ADM);
-        })
-
-        ->orderBy('rg.IND', 'ASC');
-},
-
-            'new_rappel_grants.grant_info:IND,LIBINDA', */
-
-
         ])
             ->where("MATRI", $request->MATRI)
             ->where("SEQ", $request->SEQ)
@@ -231,7 +184,7 @@ class RappelController extends Controller
             ->orderBy('rg.IND', 'ASC')
             ->get();
 
-       // dd($rappel);
+        // dd($rappel);
 
         if (!defined('_MPDF_TTFONTPATH')) {
             // an absolute path is preferred, trailing slash required:
@@ -295,7 +248,7 @@ class RappelController extends Controller
 
         $mpdf = new CMPDF();
         $mpdf->initialize($settings);
-        $mpdf->viewToPDF('admin/rappel/pdf-rappel', ["rappel" => $rappel,"grants" => $grants, "serv" => []]);
+        $mpdf->viewToPDF('admin/rappel/pdf-rappel', ["rappel" => $rappel, "grants" => $grants, "serv" => []]);
 
         //can use these functions :
         // $mpdf->getObject()->pdf_version = '1.5';

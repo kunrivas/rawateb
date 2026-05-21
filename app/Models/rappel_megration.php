@@ -63,12 +63,12 @@ class rappel_megration extends Model
         ->orderBy("IND", "ASC");
 }   
 
-/* public function new_rappel_grants()
+ public function new_rappel_grants()
 {
     return $this->hasMany(rappel_grant::class, "MATRI", "MATRI")
         ->where("rappel_grants.OLDNEW", "N") 
         ->orderBy("IND", "ASC");
 } 
- */
+ 
      
 }

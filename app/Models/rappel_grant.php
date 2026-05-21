@@ -16,7 +16,7 @@ class rappel_grant extends Model
         return $this->belongsTo(grant_info::class, "IND", "IND");
     }
 
-    /* public function old_rappel_grant()
+     public function old_rappel_grant()
 {
     return $this->hasOne(rappel_grant::class, 'MATRI', 'MATRI')
     ->where('rappel_grants.OLDNEW', 'A') 
@@ -33,5 +33,5 @@ class rappel_grant extends Model
         ->whereColumn('ID_MEGRATION_RA', 'ID_MEGRATION_RA')
         ->whereColumn('ADM', 'ADM')
         ->whereColumn('IND', 'IND');
-} */
+} 
 }
