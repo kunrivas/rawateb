@@ -142,6 +142,7 @@
                         <th scope="col"> الوظيفة </th>
                         <th scope="col"> عدد ايام الغياب </th>
                         <th scope="col">نقطة المردودية </th>
+                        <th scope="col">السبب</th>
                         <th scope="col"> </th>
                     </tr>
                 </thead>
@@ -162,6 +163,7 @@
                                         / {{ intval($value->employee->fonction->TAUXPR ?? '') }}
                                     @endif
                                 </td>
+                                <td>{{ $value->zero_point_reason ?? '' }}</td>
                                 <td>
                                     {{--  @if ($rendementReservation->status && $rendement_reservations_statistic->status == 0) --}}
                                     @if ($rendementReservation->status)
@@ -268,6 +270,14 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row" id="zeroPointReasonRow" style="display: none;">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="zero_point_reason">سبب منح نقطة 0:</label>
+                                <textarea class="form-control" id="zero_point_reason" name="zero_point_reason" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm m-1 btn-primary" style="display: none;" id="addBtn">حجز
@@ -290,6 +300,9 @@
                 $("#em-info-error").hide();
                 $("#em-info").hide();
                 $("#addBtn").hide();
+                $("#point").val("");
+                $("#zero_point_reason").val("");
+                $("#zeroPointReasonRow").hide();
 
                 $.ajax({
                     url: `/director/rendement/{{ $rendementReservation->id }}/get-employee/${MATRI}`,
@@ -329,14 +342,36 @@
                 if (MATRI) fetchEmployeeData(MATRI);
             });
 
+            $("#point").on("input", function() {
+                if ($(this).val() !== "" && Number($(this).val()) === 0) {
+                    $("#zeroPointReasonRow").show();
+                } else {
+                    $("#zeroPointReasonRow").hide();
+                    $("#zero_point_reason").val("");
+                }
+            });
+
             $("#addBtn").click(function(e) {
                 e.preventDefault();
                 $("#addBtn").hide();
                 var MATRI = $("#MATRI_display").text();
                 var areservationId = {{ $rendementReservation->id }};
-                var point = parseInt($("#point").val());
-                if (point && (point > maxpoint || point < 0)) {
+                var pointValue = $("#point").val();
+                var point = Number(pointValue);
+                var zeroPointReason = $("#zero_point_reason").val().trim();
+                if (pointValue === "" || Number.isNaN(point)) {
+                    alert("يجب إدخال النقطة");
+                    $("#addBtn").show();
+                    return;
+                }
+                if (point > maxpoint || point < 0) {
                     alert("النقطة لا يجب ان تكون اعلى من " + maxpoint + " أو اقل من 0");
+                    $("#addBtn").show();
+                    return;
+                }
+
+                if (point === 0 && zeroPointReason === "") {
+                    alert("يجب إدخال سبب منح نقطة 0");
                     $("#addBtn").show();
                     return;
                 }
@@ -346,6 +381,7 @@
                 formData.append("MATRI", MATRI);
                 formData.append("rendement_reservations_id", areservationId);
                 formData.append("point", point);
+                formData.append("zero_point_reason", zeroPointReason);
 
                 $.ajax({
                     url: "/director/rendement/reservation/employee/add",

@@ -1531,6 +1531,7 @@ CREATE TABLE `rendement_reservation_employees` (
   `MATRI` varchar(10) NOT NULL,
   `abs` int(11) NOT NULL,
   `point` float DEFAULT NULL,
+  `zero_point_reason` text DEFAULT NULL,
   `rendement_reservations_id` int(11) NOT NULL,
   `estab_mail_code` varchar(50) DEFAULT NULL,
   `affect` int(11) NOT NULL,

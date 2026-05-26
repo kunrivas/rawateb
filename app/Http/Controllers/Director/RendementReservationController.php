@@ -210,6 +210,10 @@ class RendementReservationController extends Controller
             return ["status" => 0, "message" => "الموظف غير موجود"];
         }
 
+        if ($request->point === null || $request->point === '' || !is_numeric($request->point)) {
+            return ["status" => 0, "message" => "يجب إدخال النقطة"];
+        }
+
         if ($employee->fonction) {
             if ($request->point > $employee->fonction->TAUXPR) {
                 $message = "نقطة الموظف "  . $employee->PRENOMA . " " . $employee->NOMA . " (" . $request->MATRI .  ") ليست صحيحة";
@@ -217,10 +221,15 @@ class RendementReservationController extends Controller
             }
         }
 
+        if ((float) $request->point == 0 && trim((string) $request->zero_point_reason) === '') {
+            return ["status" => 0, "message" => "يجب إدخال سبب منح نقطة 0"];
+        }
+
         $r_r_emp = new RendementReservationEmployee();
         $r_r_emp->MATRI = $employee->MATRI;
         $r_r_emp->abs = $rendementReservation->absTotal - $employee->workCount($rendementReservation);
         $r_r_emp->point = $request->point;
+        $r_r_emp->zero_point_reason = (float) $request->point == 0 ? trim((string) $request->zero_point_reason) : null;
         $r_r_emp->affect = $employee->AFFECT;
         $r_r_emp->estab_mail_code = $establishment->estab_mail_code;
         $r_r_emp->rendement_reservations_id = $rendementReservation->id;

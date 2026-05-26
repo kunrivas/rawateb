@@ -103,6 +103,7 @@
                         <th scope="col">الإدارة </th>
                         <th scope="col"> عدد ايام الغياب </th>
                         <th scope="col">نقطة المردودية </th>
+                        <th scope="col">سبب الصفر</th>
 
 
                     </tr>
@@ -131,7 +132,7 @@
 
                         @foreach ($rendement_reservations_employees as $adm => $group)
                             <tr class="table-primary">
-                                <th colspan="8">ADM: {{ $adm }}</th>
+                                <th colspan="9">ADM: {{ $adm }}</th>
                             </tr>
 
                             @foreach ($group as $key => $value)
@@ -154,6 +155,7 @@
                                     <td>{{ $value->employee->adm->ADM ?? '' }}</td>
                                     <td>{{ $value->abs }}</td>
                                     <td>{{ $value->point ?? '' }}</td>
+                                    <td>{{ isset($value->point) && (float) $value->point == 0 ? ($value->zero_point_reason ?? '') : '' }}</td>
                                 </tr>
                             @endforeach
                         @endforeach
