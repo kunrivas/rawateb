@@ -34,9 +34,17 @@
                                     <input type="hidden" name="MATRI" value="{{ $employee->MATRI }}">
                                     <input type="hidden" name="YEAR" value="{{ $year }}">
 
-                                    <button class="btn btn-primary btn-sm">
-                                        عرض الإقتطاعات
-                                    </button>
+                                    <div class="input-group">
+                                        <select name="IND" class="form-select form-select-sm">
+                                            <option value="399" selected>399 - الخدمات الاجتماعية</option>
+                                            <option value="397">397 - اقتطاع الخدمات 1</option>
+                                            <option value="398">398 - اقتطاع الخدمات 2</option>
+                                            <option value="301">301 - اقتطاع غياب</option>
+                                        </select>
+                                        <button class="btn btn-primary btn-sm ms-1">
+                                            عرض الإقتطاعات
+                                        </button>
+                                    </div>
                                 </form>
                             </td>
                         </tr>

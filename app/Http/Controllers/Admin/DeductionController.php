@@ -83,23 +83,31 @@ class DeductionController extends Controller
     {
         $employee = employee::where('MATRI', $request->MATRI)->firstOrFail();
 
+        $allowedTypes = [399, 397, 398, 301];
+        $type = intval($request->input('IND', 399));
+        if (!in_array($type, $allowedTypes, true)) {
+            $type = 399;
+        }
+
+        $typeLabels = [
+            399 => 'الخدمات الاجتماعية',
+            397 => 'اقتطاع 397',
+            398 => 'اقتطاع 398',
+            301 => 'اقتطاع 301',
+        ];
+
         // all megrations of selected year
         $megrations = megration::where('YEAR', $request->YEAR)
-       ->orderBy('MONTH', 'desc')
-        ->get(); 
-        /*   orderBy('YEAR', 'desc')
-         ->orderBy('MONTH', 'desc')
-         ->get();
-  */
+            ->orderBy('MONTH', 'desc')
+            ->get();
+
         $rows = [];
         $total = 0;
 
         foreach ($megrations as $megration) {
-
-            // IND = 399 (الخدمات الاجتماعية)
             $grant = \App\Models\grant::where('MATRI', $employee->MATRI)
                 ->where('ID_MEGRATION', $megration->ID_MEGRATION)
-                ->where('IND', 399)
+                ->where('IND', $type)
                 ->first();
 
             $amount = $grant ? $grant->MONTANT : 0;
@@ -107,16 +115,18 @@ class DeductionController extends Controller
 
             $rows[] = [
                 'year'   => $megration->YEAR,
-                'month'   => $megration->MONTH,
-                'amount' => $amount
+                'month'  => $megration->MONTH,
+                'amount' => $amount,
             ];
         }
 
         $data = [
-            'employee' => $employee,
-            'year'     => $request->YEAR,
-            'rows'     => $rows,
-            'total'    => $total
+            'employee'   => $employee,
+            'year'       => $request->YEAR,
+            'rows'       => $rows,
+            'total'      => $total,
+            'ind'        => $type,
+            'indLabel'   => $typeLabels[$type] ?? 'غير محدد',
         ];
 
         $mpdf = new CMPDF();

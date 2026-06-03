@@ -78,8 +78,11 @@
                 @endif
             </td>
         </tr>
-        <tr>
-            <td colspan="6">
+        <tr>            <td colspan="12">
+                <strong>نوع الاقتطاع:</strong> {{ $ind }} - {{ $indLabel }}
+            </td>
+        </tr>
+        <tr>            <td colspan="6">
                 <strong>الإدارة:</strong>
                 {{ $employee->ADM }}
             </td>
